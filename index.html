@@ -3846,6 +3846,13 @@ function renderFlightLogRecords(rows) {
   rows.forEach(r => { if (r.dep_iata) depCounts[r.dep_iata] = (depCounts[r.dep_iata] || 0) + 1; });
   const topDep = Object.keys(depCounts).sort((a, b) => depCounts[b] - depCounts[a])[0];
 
+  const totalDistance = rows.reduce((sum, r) => sum + (r.distance_km || 0), 0);
+  const totalMinutes = rows.reduce((sum, r) => sum + (r.distance_km ? estimateFlightMinutes(r.distance_km) : 0), 0);
+  const uniqueAirports = new Set();
+  rows.forEach(r => { if (r.dep_iata) uniqueAirports.add(r.dep_iata); if (r.arr_iata) uniqueAirports.add(r.arr_iata); });
+  const EARTH_CIRCUMFERENCE_KM = 40075;
+  const MOON_DISTANCE_KM = 384400;
+
   const cards = [
     {
       label: '最長單程',
@@ -3861,6 +3868,36 @@ function renderFlightLogRecords(rows) {
       label: '最常出發',
       value: topDep || '—',
       sub: topDep ? `${depCounts[topDep]} 趟` : '',
+    },
+    {
+      label: '累計飛行距離',
+      value: totalDistance ? `${Math.round(totalDistance).toLocaleString()} km` : '—',
+      sub: '',
+    },
+    {
+      label: '總飛行次數',
+      value: rows.length ? `${rows.length}` : '—',
+      sub: rows.length ? '航段' : '',
+    },
+    {
+      label: '造訪機場數',
+      value: uniqueAirports.size ? `${uniqueAirports.size}` : '—',
+      sub: uniqueAirports.size ? '個不重複機場' : '',
+    },
+    {
+      label: '累計飛行時數',
+      value: totalMinutes ? formatFlightMinutes(totalMinutes) : '—',
+      sub: '',
+    },
+    {
+      label: '繞地球圈數',
+      value: totalDistance ? `${(totalDistance / EARTH_CIRCUMFERENCE_KM).toFixed(2)} 圈` : '—',
+      sub: '',
+    },
+    {
+      label: '飛到月球進度',
+      value: totalDistance ? `${Math.min(100, totalDistance / MOON_DISTANCE_KM * 100).toFixed(2)}%` : '—',
+      sub: '',
     },
   ];
   el.innerHTML = cards.map(c => `

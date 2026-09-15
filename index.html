@@ -1259,6 +1259,16 @@
     .flight-log-map-toggle.active { background: #f0c252; color: #1a1206; }
     .flight-log-icon-toggle { padding: 8px; }
     .flight-log-records { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .flight-log-records.collapsed { display: none; }
+    .flight-log-more-stats-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; margin: -6px 0 18px; padding: 13px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 14px;
+      color: var(--deck-ink); font-size: 13px; font-weight: 700; letter-spacing: .02em; cursor: pointer;
+    }
+    .flight-log-more-stats-toggle:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+    .flight-log-more-stats-toggle .chevron { display: inline-block; font-size: 15px; transition: transform .2s ease; }
+    .flight-log-more-stats-toggle.open .chevron { transform: rotate(180deg); }
     .flight-log-record-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 11px 10px; min-width: 0; }
     .flight-log-record-card .rlabel { font-size: 9px; color: rgba(235,241,249,.5); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
     .flight-log-record-card .rvalue { font-size: 13px; font-weight: 700; color: var(--deck-ink); line-height: 1.3; overflow-wrap: break-word; }
@@ -1712,11 +1722,12 @@
           </div>
           <div class="flight-log-stats">
             <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-km">0</div><div class="label">累積公里數 KM</div></div>
-            <div class="flight-log-stat-card"><div class="num teal" id="fl-stat-countries">0</div><div class="label">航跡涵蓋國家</div></div>
-            <div class="flight-log-stat-card"><div class="num" id="fl-stat-count">0</div><div class="label">飛行紀錄</div></div>
-            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-days">0</div><div class="label">總天數</div></div>
+            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-days">0</div><div class="label">總旅行天數</div></div>
           </div>
-          <div class="flight-log-records" id="flight-log-records"></div>
+          <button class="flight-log-more-stats-toggle" id="flight-log-more-stats-toggle" type="button" onclick="toggleFlightLogMoreStats()">
+            更多統計 <span class="chevron">﹀</span>
+          </button>
+          <div class="flight-log-records collapsed" id="flight-log-records"></div>
           <div class="flight-log-section-label">紀錄清單</div>
           <div class="flight-log-list" id="flight-log-list"></div>
           <button class="flight-log-more-btn" id="flight-log-more-btn" type="button" onclick="loadMoreFlightLogGroups()" style="display:none">更早的記錄 ﹀</button>
@@ -3354,7 +3365,7 @@ function openAchievementGallery() {
   const button = document.getElementById("achievement-gallery-button");
   if (!overlay) return;
   achievementGalleryReturnFocus = document.activeElement;
-  switchGalleryTab("achievement");
+  switchGalleryTab(currentAuthUser ? "flight" : "achievement");
   overlay.classList.add("show");
   overlay.setAttribute("aria-hidden", "false");
   if (button) button.setAttribute("aria-expanded", "true");
@@ -3842,14 +3853,21 @@ function renderFlightLogRecords(rows) {
   rows.forEach(r => { if (r.airline_id) airlineCounts[r.airline_id] = (airlineCounts[r.airline_id] || 0) + 1; });
   const topAirlineId = Object.keys(airlineCounts).sort((a, b) => airlineCounts[b] - airlineCounts[a])[0];
 
-  const depCounts = {};
-  rows.forEach(r => { if (r.dep_iata) depCounts[r.dep_iata] = (depCounts[r.dep_iata] || 0) + 1; });
-  const topDep = Object.keys(depCounts).sort((a, b) => depCounts[b] - depCounts[a])[0];
+  const arrCounts = {};
+  rows.forEach(r => { if (r.arr_iata) arrCounts[r.arr_iata] = (arrCounts[r.arr_iata] || 0) + 1; });
+  const topArr = Object.keys(arrCounts).sort((a, b) => arrCounts[b] - arrCounts[a])[0];
 
   const totalDistance = rows.reduce((sum, r) => sum + (r.distance_km || 0), 0);
   const totalMinutes = rows.reduce((sum, r) => sum + (r.distance_km ? estimateFlightMinutes(r.distance_km) : 0), 0);
   const uniqueAirports = new Set();
   rows.forEach(r => { if (r.dep_iata) uniqueAirports.add(r.dep_iata); if (r.arr_iata) uniqueAirports.add(r.arr_iata); });
+  const countries = new Set();
+  rows.forEach(r => {
+    const c1 = window.AIRPORT_MASTER?.[r.dep_iata]?.country;
+    const c2 = window.AIRPORT_MASTER?.[r.arr_iata]?.country;
+    if (c1) countries.add(c1);
+    if (c2) countries.add(c2);
+  });
   const EARTH_CIRCUMFERENCE_KM = 40075;
   const MOON_DISTANCE_KM = 384400;
 
@@ -3865,9 +3883,9 @@ function renderFlightLogRecords(rows) {
       sub: topAirlineId ? `${airlineCounts[topAirlineId]} 趟` : '',
     },
     {
-      label: '最常出發',
-      value: topDep || '—',
-      sub: topDep ? `${depCounts[topDep]} 趟` : '',
+      label: '最常去目的地',
+      value: topArr || '—',
+      sub: topArr ? `${arrCounts[topArr]} 趟` : '',
     },
     {
       label: '累計飛行距離',
@@ -3883,6 +3901,11 @@ function renderFlightLogRecords(rows) {
       label: '造訪機場數',
       value: uniqueAirports.size ? `${uniqueAirports.size}` : '—',
       sub: uniqueAirports.size ? '個不重複機場' : '',
+    },
+    {
+      label: '航跡涵蓋國家',
+      value: countries.size ? `${countries.size}` : '—',
+      sub: '',
     },
     {
       label: '累計飛行時數',
@@ -3993,8 +4016,6 @@ function renderFlightLogPanel() {
     return sum + Math.max(span, 1);
   }, 0);
   document.getElementById('fl-stat-km').textContent = totalKm.toLocaleString();
-  document.getElementById('fl-stat-countries').textContent = countries.size;
-  document.getElementById('fl-stat-count').textContent = rows.length;
   document.getElementById('fl-stat-days').textContent = totalDays;
 
   renderFlightLogRecords(rows);
@@ -4127,6 +4148,12 @@ function renderTicketCard(legs, crossYear) {
   `;
 }
 
+function toggleFlightLogMoreStats() {
+  const el = document.getElementById('flight-log-records');
+  const btn = document.getElementById('flight-log-more-stats-toggle');
+  const open = el.classList.toggle('collapsed') === false;
+  btn.classList.toggle('open', open);
+}
 function toggleFlightLogSelectMode() {
   flightLogSelectMode = !flightLogSelectMode;
   flightLogSelectedKeys.clear();

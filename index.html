@@ -1081,6 +1081,19 @@
     }
 
     /* Achievement gallery */
+    .lang-toggle-btn {
+      min-height: 38px; min-width: 38px; padding: 0 10px; border-radius: 13px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #f6f8fb; background: rgba(8,16,28,.82);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 8px 24px rgba(3,8,18,.18);
+      cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: .02em;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .lang-toggle-btn:hover {
+      transform: translateY(-1px); background: rgba(18,30,48,.96);
+      border-color: rgba(240,194,82,.42);
+    }
     .achievement-gallery-button {
       min-height: 38px; padding: 0 13px; border-radius: 13px;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -1212,6 +1225,7 @@
     }
     .achievement-gallery-date { margin-top: 9px; color: rgba(235,241,249,.42); font-size: 9px; }
     @media (max-width: 860px), (pointer: coarse) {
+      .lang-toggle-btn { width: 44px; height: 44px; min-height: 44px; padding: 0; }
       .achievement-gallery-button { width: 44px; height: 44px; min-height: 44px; padding: 0; }
       .achievement-gallery-button-label, #achievement-gallery-button-count { display: none; }
       #achievement-gallery-overlay { padding: 10px; align-items: flex-end; }
@@ -1448,7 +1462,7 @@
     <div id="header-left">
       <div id="cockpit-brand" aria-label="航線圖鑑 SkyDex">
         <span class="cockpit-brand-kicker">SkyDex</span>
-        <span class="cockpit-brand-title">航線圖鑑</span>
+        <span class="cockpit-brand-title" data-i18n="brandTitle">航線圖鑑</span>
       </div>
       <!-- 統一用膠囊按鈕＋展開選單取代原本橫排 tabs，避免航空公司變多時橫向擠壓/溢出 -->
       <div id="airline-picker">
@@ -1463,13 +1477,14 @@
       </div>
     </div>
     <div id="header-right">
+      <button class="lang-toggle-btn" id="lang-toggle-btn" type="button" title="Switch language / 切換語言" aria-label="Switch language" onclick="setLang(LANG === 'en' ? 'zh' : 'en')">EN</button>
       <button class="achievement-gallery-button" id="achievement-gallery-button" type="button"
         onclick="handleAchievementButtonClick()" aria-haspopup="dialog" aria-controls="achievement-gallery-overlay" aria-expanded="false">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M5 2h6v3.2c0 2-1.34 3.66-3 3.66S5 7.2 5 5.2V2Z" stroke="currentColor" stroke-width="1.2"/>
           <path d="M5 3.2H2.8c0 2.3.9 3.65 2.85 4.1M11 3.2h2.2c0 2.3-.9 3.65-2.85 4.1M8 8.9v2.25M5.5 14h5M6.1 11.15h3.8V14H6.1v-2.85Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="achievement-gallery-button-label" id="achievement-gallery-button-label">成就</span>
+        <span class="achievement-gallery-button-label" id="achievement-gallery-button-label" data-i18n="achievementsBtn">成就</span>
         <span id="achievement-gallery-button-count">0/9</span>
         <span id="auth-status-dot" aria-hidden="true"></span>
       </button>
@@ -1480,7 +1495,7 @@
           <circle cx="8" cy="7.5" r="0.7" fill="currentColor"/>
           <circle cx="10.5" cy="7.5" r="0.7" fill="currentColor"/>
         </svg>
-        <span class="fb-fab-label">問題回報 / 建議</span>
+        <span class="fb-fab-label" data-i18n="feedbackBtn">問題回報 / 建議</span>
       </button>
     </div>
   </div>
@@ -1492,7 +1507,7 @@
         <circle cx="5.5" cy="5.5" r="4" stroke="#86868b" stroke-width="1.3"/>
         <path d="M9 9L12.5 12.5" stroke="#86868b" stroke-width="1.3" stroke-linecap="round"/>
       </svg>
-      <input id="search-input" type="text" placeholder="搜尋所有航空公司航點或 IATA" oninput="onSearch(this.value)" />
+      <input id="search-input" type="text" placeholder="搜尋所有航空公司航點或 IATA" data-i18n-placeholder="searchPlaceholder" oninput="onSearch(this.value)" />
     </div>
     <div id="search-results"></div>
     <div id="filter-bar" aria-label="航線篩選摘要">
@@ -1501,7 +1516,7 @@
           <path d="M2.5 4h11M4.5 8h7M6.5 12h3" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
           <circle cx="5" cy="4" r="1.15" fill="currentColor"/><circle cx="10.5" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="12" r="1.15" fill="currentColor"/>
         </svg>
-        <span>篩選</span>
+        <span data-i18n="filterBtn">篩選</span>
         <span id="filter-count-badge" hidden>0</span>
       </button>
     </div>
@@ -1514,7 +1529,7 @@
       <div class="filter-title-wrap">
         <div class="filter-eyebrow">Route filters</div>
         <div class="filter-title">
-          <span id="filter-panel-title">篩選航線</span>
+          <span id="filter-panel-title" data-i18n="filterPanelTitle">篩選航線</span>
           <span class="filter-title-dest"><span class="stat-value" id="stat-dest" style="color:#9c6c4c">35</span>目的地</span>
         </div>
       </div>
@@ -1525,13 +1540,13 @@
     <div id="filter-groups"></div>
     <div class="filter-panel-footer">
       <div class="filter-footer-result" aria-live="polite"><strong id="filter-footer-count">0 條航線</strong><span id="filter-footer-dest">0 個航點</span></div>
-      <button id="filter-reset" type="button" onclick="resetRouteFilters()">重設篩選</button>
+      <button id="filter-reset" type="button" onclick="resetRouteFilters()" data-i18n="filterResetBtn">重設篩選</button>
     </div>
   </section>
 
   <!-- Info card -->
   <div id="info-card">
-    <div class="drawer-kicker">已選航點</div>
+    <div class="drawer-kicker" data-i18n="selectedAirports">已選航點</div>
     <div class="card-header">
       <span class="card-iata" id="card-iata"></span>
       <span class="card-city" id="card-city"></span>
@@ -1550,10 +1565,10 @@
   </div>
   <div class="fb-overlay" id="fb-overlay" aria-hidden="true">
       <div class="fb-box" role="dialog" aria-modal="true">
-        <h3>問題回報 / 建議</h3>
+        <h3 data-i18n="feedbackTitle">問題回報 / 建議</h3>
         <select id="fb-type">
-          <option value="錯誤回報">錯誤回報</option>
-          <option value="功能建議">功能建議</option>
+          <option value="錯誤回報" data-i18n="feedbackBug">錯誤回報</option>
+          <option value="功能建議" data-i18n="feedbackSuggestion">功能建議</option>
         </select>
         <textarea id="fb-desc" placeholder="請詳細描述問題或建議，感謝你的回饋。"></textarea>
       <div class="fb-star-row" id="fb-star-row">
@@ -1566,8 +1581,8 @@
       <div class="fb-star-hint" id="fb-star-hint"></div>
       <input id="fb-contact" placeholder="聯絡方式（選填）">
       <div class="fb-actions">
-        <button type="button" class="fb-cancel-btn" onclick="fbClose()">取消</button>
-        <button id="fb-send" type="button" onclick="fbSubmit()">送出回報</button>
+        <button type="button" class="fb-cancel-btn" onclick="fbClose()" data-i18n="cancelBtn">取消</button>
+        <button id="fb-send" type="button" onclick="fbSubmit()" data-i18n="feedbackSubmit">送出回報</button>
       </div>
       <div class="fb-msg" id="fb-msg"></div>
     </div>
@@ -1575,20 +1590,20 @@
 
   <div class="fb-overlay" id="auth-overlay" aria-hidden="true">
     <div class="fb-box" role="dialog" aria-modal="true">
-      <h3 id="auth-box-title">登入 SkyDex</h3>
+      <h3 id="auth-box-title" data-i18n="loginTitle">登入 SkyDex</h3>
       <div id="auth-step-email">
-        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;">使用 Google 帳號登入，成就資料將自動同步到雲端。</p>
+        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;" data-i18n="loginDesc">使用 Google 帳號登入，成就資料將自動同步到雲端。</p>
         <div class="fb-actions">
-          <button type="button" class="fb-cancel-btn" onclick="authClose()">取消</button>
-          <button id="auth-google-btn" type="button" onclick="authLoginWithGoogle()">使用 Google 登入</button>
+          <button type="button" class="fb-cancel-btn" onclick="authClose()" data-i18n="cancelBtn">取消</button>
+          <button id="auth-google-btn" type="button" onclick="authLoginWithGoogle()" data-i18n="loginGoogle">使用 Google 登入</button>
         </div>
       </div>
       <div id="auth-step-sent" style="display:none"></div>
       <div id="auth-step-loggedin" style="display:none">
-        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;">已登入：<span id="auth-current-email"></span></p>
+        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;"><span data-i18n="loggedInAs">已登入：</span><span id="auth-current-email"></span></p>
         <div class="fb-actions">
-          <button type="button" class="fb-cancel-btn" onclick="authClose()">關閉</button>
-          <button id="auth-logout-btn" type="button" onclick="authLogout()">登出</button>
+          <button type="button" class="fb-cancel-btn" onclick="authClose()" data-i18n="closeBtn">關閉</button>
+          <button id="auth-logout-btn" type="button" onclick="authLogout()" data-i18n="logoutBtn">登出</button>
         </div>
       </div>
       <div class="fb-msg" id="auth-msg"></div>
@@ -1598,7 +1613,7 @@
   <div class="flight-log-sheet-backdrop" id="add-flight-sheet" onclick="if(event.target===this) closeAddFlightSheet()">
     <div class="flight-log-sheet" onclick="event.stopPropagation()">
       <div class="flight-log-sheet-header">
-        <h3 id="af-sheet-title">新增飛行紀錄</h3>
+        <h3 id="af-sheet-title" data-i18n="addFlightLog">新增飛行紀錄</h3>
         <button class="flight-log-sheet-close" type="button" onclick="closeAddFlightSheet()" aria-label="關閉新增飛行紀錄">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         </button>
@@ -1615,9 +1630,9 @@
         <button type="button" class="flight-log-oneway-switch" id="af-oneway-switch" onclick="toggleAddFlightOneway()" aria-pressed="false" aria-label="只加單程"></button>
       </div>
       <div class="flight-log-field-row date-field-row">
-        <div class="flight-log-field"><label id="af-dep-flightno-label">去程航班號（選填）</label><input id="af-dep-flightno" placeholder="FM802"></div>
+        <div class="flight-log-field"><label id="af-dep-flightno-label" data-i18n="outboundFlightNo">去程航班號（選填）</label><input id="af-dep-flightno" placeholder="FM802"></div>
         <div class="flight-log-field">
-          <label id="af-dep-date-label">去程日期</label>
+          <label id="af-dep-date-label" data-i18n="outboundDate">去程日期</label>
           <div class="date-select-group">
             <select id="af-dep-date-y" onchange="syncDateSelectToHidden('af-dep-date')"></select>
             <select id="af-dep-date-m" onchange="syncDateSelectToHidden('af-dep-date')"></select>
@@ -1627,13 +1642,13 @@
         </div>
       </div>
       <div class="flight-log-field" id="af-dep-airline-field">
-        <label>航空公司（選填）</label>
+        <label data-i18n="airlineOptional">航空公司（選填）</label>
         <select id="af-dep-airline"></select>
       </div>
       <div class="flight-log-field-row date-field-row" id="af-return-row">
-        <div class="flight-log-field"><label>回程航班號（選填）</label><input id="af-arr-flightno" placeholder="FM803"></div>
+        <div class="flight-log-field"><label data-i18n="returnFlightNo">回程航班號（選填）</label><input id="af-arr-flightno" placeholder="FM803"></div>
         <div class="flight-log-field">
-          <label>回程日期</label>
+          <label data-i18n="returnDate">回程日期</label>
           <div class="date-select-group">
             <select id="af-arr-date-y" onchange="syncDateSelectToHidden('af-arr-date')"></select>
             <select id="af-arr-date-m" onchange="syncDateSelectToHidden('af-arr-date')"></select>
@@ -1643,15 +1658,15 @@
         </div>
       </div>
       <div class="flight-log-field" id="af-return-airline-field">
-        <label>回程航空公司（選填）</label>
+        <label data-i18n="returnAirline">回程航空公司（選填）</label>
         <select id="af-arr-airline"></select>
       </div>
       <div class="flight-log-field">
-        <label>備註（選填）</label>
+        <label data-i18n="notesOptional">備註（選填）</label>
         <textarea id="af-note" rows="2" placeholder="例如：轉機、延誤、特別事項..."></textarea>
       </div>
-      <button class="flight-log-sheet-submit" id="af-submit-btn" onclick="submitAddFlightSheet()">儲存紀錄</button>
-      <button class="flight-log-sheet-delete" id="af-delete-btn" type="button" onclick="deleteFlightLogFromSheet()" style="display:none">刪除這筆紀錄</button>
+      <button class="flight-log-sheet-submit" id="af-submit-btn" onclick="submitAddFlightSheet()" data-i18n="saveRecord">儲存紀錄</button>
+      <button class="flight-log-sheet-delete" id="af-delete-btn" type="button" onclick="deleteFlightLogFromSheet()" style="display:none" data-i18n="deleteRecord">刪除這筆紀錄</button>
       <div class="flight-log-sheet-msg" id="af-msg"></div>
     </div>
   </div>
@@ -1659,18 +1674,18 @@
   <div class="flight-log-sheet-backdrop" id="edit-trip-sheet" onclick="if(event.target===this) closeEditTripSheet()">
     <div class="flight-log-sheet" onclick="event.stopPropagation()">
       <div class="flight-log-sheet-header">
-        <h3>編輯行程</h3>
+        <h3 data-i18n="editTrip">編輯行程</h3>
         <button class="flight-log-sheet-close" type="button" onclick="closeEditTripSheet()" aria-label="關閉編輯行程">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         </button>
       </div>
       <div id="et-legs"></div>
       <div class="flight-log-field">
-        <label>備註（選填，套用到整趟行程）</label>
+        <label data-i18n="notesTripWide">備註（選填，套用到整趟行程）</label>
         <textarea id="et-note" rows="2" placeholder="例如：多城市自由行..."></textarea>
       </div>
-      <button class="flight-log-sheet-submit" type="button" onclick="submitEditTripSheet()">更新行程</button>
-      <button class="flight-log-sheet-delete" type="button" onclick="deleteTripFromSheet()">刪除整趟行程</button>
+      <button class="flight-log-sheet-submit" type="button" onclick="submitEditTripSheet()" data-i18n="updateTrip">更新行程</button>
+      <button class="flight-log-sheet-delete" type="button" onclick="deleteTripFromSheet()" data-i18n="deleteTrip">刪除整趟行程</button>
       <div class="flight-log-sheet-msg" id="et-msg"></div>
     </div>
   </div>
@@ -1681,11 +1696,11 @@
       <header class="achievement-gallery-header">
         <div>
           <div class="achievement-gallery-eyebrow" id="achievement-gallery-eyebrow">Achievement collection</div>
-          <h2 id="achievement-gallery-title">成就圖鑑</h2>
+          <h2 id="achievement-gallery-title" data-i18n="achievementGallery">成就圖鑑</h2>
           <div id="achievement-gallery-summary"></div>
         </div>
         <div id="achievement-gallery-auth-row" style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--deck-muted)">
-          <span id="achievement-gallery-auth-status">尚未登入</span>
+          <span id="achievement-gallery-auth-status" data-i18n="notLoggedIn">尚未登入，成就僅存於本機</span>
           <button id="achievement-gallery-auth-action" type="button"
             style="border:0;background:rgba(255,255,255,.08);color:var(--deck-ink);border-radius:8px;padding:3px 9px;font-size:10.5px;cursor:pointer"
             onclick="handleAchievementAuthAction()">登入</button>
@@ -1698,11 +1713,11 @@
       <div class="gallery-tabbar">
         <button class="gallery-tab-btn active" id="gallery-tab-btn-achievement" onclick="switchGalleryTab('achievement')">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 2h6v3.2c0 2-1.34 3.66-3 3.66S5 7.2 5 5.2V2Z" stroke="currentColor" stroke-width="1.3"/><path d="M5 3.2H2.8c0 2.3.9 3.65 2.85 4.1M11 3.2h2.2c0 2.3-.9 3.65-2.85 4.1M8 8.9v2.25M5.5 14h5M6.1 11.15h3.8V14H6.1v-2.85Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          成就圖鑑
+          <span data-i18n="achievementGalleryTab">成就圖鑑</span>
         </button>
         <button class="gallery-tab-btn" id="gallery-tab-btn-flight" onclick="switchGalleryTab('flight')">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8.5l5-1.2 3-5.3 1.5.4-1.7 5 4-1 1.3.9-4.6 2.7-2.3 4.8-1.4-.4.8-3.5-4.6.6-1-1.6 3.8-1.2-3.8-.2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-          飛行紀錄
+          <span data-i18n="flightLogTab">飛行紀錄</span>
         </button>
       </div>
       <div class="gallery-tab-panel active" id="gallery-tab-achievement">
@@ -1717,28 +1732,28 @@
             </button>
             <button class="flight-log-map-toggle" id="flight-log-map-toggle" type="button" onclick="toggleMyFlightsOnMap()">
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.5 4.5 8.5s4.5-5.1 4.5-8.5c0-2.5-2-4.5-4.5-4.5Z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="6" r="1.6" stroke="currentColor" stroke-width="1.1"/></svg>
-              <span id="flight-log-map-toggle-label">在地圖上顯示</span>
+              <span id="flight-log-map-toggle-label" data-i18n="showOnMap">在地圖上顯示</span>
             </button>
           </div>
           <div class="flight-log-stats">
-            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-km">0</div><div class="label">累積公里數 KM</div></div>
-            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-days">0</div><div class="label">總旅行天數</div></div>
+            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-km">0</div><div class="label" data-i18n="totalKm">累積公里數 KM</div></div>
+            <div class="flight-log-stat-card"><div class="num gold" id="fl-stat-days">0</div><div class="label" data-i18n="totalDays">總旅行天數</div></div>
           </div>
           <button class="flight-log-more-stats-toggle" id="flight-log-more-stats-toggle" type="button" onclick="toggleFlightLogMoreStats()">
-            更多統計 <span class="chevron">﹀</span>
+            <span data-i18n="moreStats">更多統計</span> <span class="chevron">﹀</span>
           </button>
           <div class="flight-log-records collapsed" id="flight-log-records"></div>
-          <div class="flight-log-section-label">紀錄清單</div>
+          <div class="flight-log-section-label" data-i18n="recordList">紀錄清單</div>
           <div class="flight-log-list" id="flight-log-list"></div>
-          <button class="flight-log-more-btn" id="flight-log-more-btn" type="button" onclick="loadMoreFlightLogGroups()" style="display:none">更早的記錄 ﹀</button>
+          <button class="flight-log-more-btn" id="flight-log-more-btn" type="button" onclick="loadMoreFlightLogGroups()" style="display:none" data-i18n="olderRecords">更早的記錄 ﹀</button>
           <div class="flight-log-empty" id="flight-log-empty" style="display:none">
             還沒有任何飛行紀錄。在地圖上點機場選「搭乘過」，或按右下角 + 手動新增。
           </div>
         </div>
         <div class="flight-log-merge-bar" id="flight-log-merge-bar">
           <span id="flight-log-merge-count">已選 0 筆</span>
-          <button type="button" class="merge-confirm" onclick="mergeSelectedFlightLogs()">合併為同一趟</button>
-          <button type="button" class="merge-cancel" onclick="toggleFlightLogSelectMode()">取消</button>
+          <button type="button" class="merge-confirm" onclick="mergeSelectedFlightLogs()" data-i18n="mergeIntoTrip">合併為同一趟</button>
+          <button type="button" class="merge-cancel" onclick="toggleFlightLogSelectMode()" data-i18n="cancelBtn">取消</button>
         </div>
         <button class="flight-log-fab" id="flight-log-fab" onclick="openAddFlightSheet()" aria-label="新增飛行紀錄">+</button>
       </div>
@@ -1761,6 +1776,107 @@
 </div>
 
 <script>
+let LANG = localStorage.getItem("skydex_lang") === "en" ? "en" : "zh";
+function setLang(lang) {
+  if (lang !== "zh" && lang !== "en") return;
+  localStorage.setItem("skydex_lang", lang);
+  location.reload();
+}
+document.getElementById("lang-toggle-btn").textContent = LANG === "en" ? "中" : "EN";
+const STRINGS = {
+  zh: {
+    brandTitle: "航線圖鑑", achievementsBtn: "成就", feedbackBtn: "問題回報 / 建議",
+    filterBtn: "篩選", filterPanelTitle: "篩選航線", filterResetBtn: "重設篩選",
+    selectedAirports: "已選航點", feedbackTitle: "問題回報 / 建議",
+    feedbackBug: "錯誤回報", feedbackSuggestion: "功能建議", cancelBtn: "取消",
+    feedbackSubmit: "送出回報", loginTitle: "登入 SkyDex",
+    loginDesc: "使用 Google 帳號登入，成就資料將自動同步到雲端。",
+    loginGoogle: "使用 Google 登入", loggedInAs: "已登入：", closeBtn: "關閉",
+    logoutBtn: "登出", addFlightLog: "新增飛行紀錄", depIata: "出發 IATA",
+    arrIata: "抵達 IATA", oneWayOnly: "只加單程（不新增回程）",
+    outboundFlightNo: "去程航班號（選填）", outboundDate: "去程日期",
+    airlineOptional: "航空公司（選填）", returnFlightNo: "回程航班號（選填）",
+    returnDate: "回程日期", returnAirline: "回程航空公司（選填）",
+    notesOptional: "備註（選填）", saveRecord: "儲存紀錄", deleteRecord: "刪除這筆紀錄",
+    editTrip: "編輯行程", notesTripWide: "備註（選填，套用到整趟行程）",
+    updateTrip: "更新行程", deleteTrip: "刪除整趟行程", achievementGallery: "成就圖鑑",
+    notLoggedIn: "尚未登入，成就僅存於本機", loggedInShort: "已登入", loginBtn: "登入", showOnMap: "在地圖上顯示",
+    totalKm: "累積公里數 KM", totalDays: "總旅行天數", recordList: "紀錄清單",
+    olderRecords: "更早的記錄 ﹀", mergeIntoTrip: "合併為同一趟",
+    flightNoOptional: "航班號（選填）", dateOnly: "日期", moreStats: "更多統計",
+    editFlightLog: "編輯飛行紀錄", updateRecord: "更新紀錄",
+    distFrom: "距", region: "地區", estFlightTime: "預估飛行時間", coordinates: "座標",
+    routeType: "航線型態", mixedType: "直飛與中停並行", viaPrefix: "經", nonstop: "直飛",
+    effectiveFromSuffix: "起", comingSoon: "即將開航", seasonalSuffix: "· 季節航班",
+    stopsCount: "中停 {n} 次", itinerary: "行程", departureHub: "出發樞紐",
+    statusLabel: "狀態", suspendedStatus: "⚠️ 目前停飛", seasonalStatus: "季節限定航班",
+    scheduledStatus: "🗓️ 即將開航", effectiveDate: "開航日期", tbd: "待公布",
+    flightNo: "航班", weeklyFreq: "每週班次", perWeekSuffix: "班/", weekUnit: "週",
+    airportFullName: "機場全名", country: "國家", alliance: "所屬聯盟", logFlightBtn: "✓ 搭乘過，加入飛行紀錄",
+    achDefaultDesc: "完成指定的航線探索條件。", hiddenNotRevealed: "隱藏條件尚未揭曉",
+    unlockedOn: "解鎖於", unlocked: "已解鎖", notUnlocked: "尚未解鎖",
+    badgeSummary: "枚徽章已解鎖 · 點選航點即可累積探索進度",
+    legOutbound: "去程", legInbound: "回程", legOneWay: "單程", tripRoundTrip: "往返", tripMultiCity: "多城市",
+    legN: "第{n}段", selectCard: "選取這張卡片", editRecord: "編輯紀錄", cancelSelect: "取消選取", select: "選取",
+    selectedCount: "已選 {n} 筆", crossYearBadge: "跨年", legAirline: "航空公司（選填）", unspecified: "未指定",
+    filterOrigin: "出發機場", filterOriginNote: "同組可複選", filterRegionTitle: "地區", filterRegionNote: "依資料分類",
+    filterStatusTitle: "航線狀態", filterStatusNote: "預設隱藏停飛與未開航", filterAll: "全部",
+    pleaseSelectDate: "請選擇日期", pleaseSelectReturnDate: "請選擇回程日期", airportNotFound: "機場代碼查無資料",
+    searchPlaceholder: "搜尋所有航空公司航點或 IATA",
+    filterEmptyMsg: "目前條件沒有符合航線，可按「重設篩選」恢復預設。",
+    achievementGalleryTab: "成就圖鑑", flightLogTab: "飛行紀錄",
+    submitting: "送出中...", submitSuccess: "已送出，謝謝回報！", submitFail: "送出失敗，請稍後再試",
+  },
+  en: {
+    brandTitle: "Route Atlas", achievementsBtn: "Achievements", feedbackBtn: "Feedback",
+    filterBtn: "Filter", filterPanelTitle: "Route Filters", filterResetBtn: "Reset Filters",
+    selectedAirports: "Selected Airports", feedbackTitle: "Feedback",
+    feedbackBug: "Report a Bug", feedbackSuggestion: "Feature Suggestion", cancelBtn: "Cancel",
+    feedbackSubmit: "Submit", loginTitle: "Sign in to SkyDex",
+    loginDesc: "Sign in with Google to sync your achievements to the cloud.",
+    loginGoogle: "Sign in with Google", loggedInAs: "Signed in:", closeBtn: "Close",
+    logoutBtn: "Sign out", addFlightLog: "Add Flight Record", depIata: "Departure IATA",
+    arrIata: "Arrival IATA", oneWayOnly: "One-way only (no return leg)",
+    outboundFlightNo: "Outbound Flight No. (optional)", outboundDate: "Outbound Date",
+    airlineOptional: "Airline (optional)", returnFlightNo: "Return Flight No. (optional)",
+    returnDate: "Return Date", returnAirline: "Return Airline (optional)",
+    notesOptional: "Notes (optional)", saveRecord: "Save Record", deleteRecord: "Delete This Record",
+    editTrip: "Edit Trip", notesTripWide: "Notes (optional, applies to whole trip)",
+    updateTrip: "Update Trip", deleteTrip: "Delete Whole Trip", achievementGallery: "Achievement Gallery",
+    notLoggedIn: "Not signed in — achievements stored locally only", loggedInShort: "Signed in", loginBtn: "Sign in", showOnMap: "Show on Map",
+    totalKm: "Total Distance (KM)", totalDays: "Total Travel Days", recordList: "Record List",
+    olderRecords: "Earlier Records ﹀", mergeIntoTrip: "Merge into One Trip",
+    flightNoOptional: "Flight No. (optional)", dateOnly: "Date", moreStats: "More Stats",
+    editFlightLog: "Edit Flight Record", updateRecord: "Update Record",
+    distFrom: "Distance from", region: "Region", estFlightTime: "Est. Flight Time", coordinates: "Coordinates",
+    routeType: "Route Type", mixedType: "Nonstop & Stopover", viaPrefix: "via", nonstop: "Nonstop",
+    effectiveFromSuffix: "", comingSoon: "Coming Soon", seasonalSuffix: "· Seasonal",
+    stopsCount: "{n} stop(s)", itinerary: "Itinerary", departureHub: "Departure Hub",
+    statusLabel: "Status", suspendedStatus: "⚠️ Suspended", seasonalStatus: "Seasonal Route",
+    scheduledStatus: "🗓️ Coming Soon", effectiveDate: "Launch Date", tbd: "TBD",
+    flightNo: "Flight", weeklyFreq: "Weekly Frequency", perWeekSuffix: "/", weekUnit: "week",
+    airportFullName: "Airport Name", country: "Country", alliance: "Alliance", logFlightBtn: "✓ Flown — Log It",
+    achDefaultDesc: "Meet the specified route exploration criteria.", hiddenNotRevealed: "Hidden — not yet revealed",
+    unlockedOn: "Unlocked on", unlocked: "Unlocked", notUnlocked: "Not yet unlocked",
+    badgeSummary: "badges unlocked · Click airports to build progress",
+    legOutbound: "Outbound", legInbound: "Return", legOneWay: "One-way", tripRoundTrip: "Round Trip", tripMultiCity: "Multi-city",
+    legN: "Leg {n}", selectCard: "Select this card", editRecord: "Edit Record", cancelSelect: "Cancel Selection", select: "Select",
+    selectedCount: "{n} selected", crossYearBadge: "Cross-year", legAirline: "Airline (optional)", unspecified: "Unspecified",
+    filterOrigin: "Departure Airport", filterOriginNote: "Multi-select", filterRegionTitle: "Region", filterRegionNote: "By category",
+    filterStatusTitle: "Route Status", filterStatusNote: "Suspended/upcoming hidden by default", filterAll: "All",
+    pleaseSelectDate: "Please select a date", pleaseSelectReturnDate: "Please select a return date", airportNotFound: "Airport code not found",
+    searchPlaceholder: "Search airlines, airports, or IATA codes",
+    filterEmptyMsg: "No routes match the current filters. Try \"Reset Filters\" to restore defaults.",
+    achievementGalleryTab: "Achievements", flightLogTab: "Flight Log",
+    submitting: "Submitting...", submitSuccess: "Submitted, thanks!", submitFail: "Submission failed, please try again later",
+  },
+};
+function t(key) { return STRINGS[LANG]?.[key] || STRINGS.zh[key] || key; }
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+}
+applyI18n();
 let map = null;
 let headerResizeObserver = null;
 let headerResizeFrame = null;
@@ -2053,7 +2169,7 @@ function routeServicePatterns(d) {
   }];
 }
 function airportRouteLabel(iata) {
-  const city = AIRPORT_MASTER[iata]?.city;
+  const city = cityName(iata, AIRPORT_MASTER[iata]?.city);
   return city ? `${iata} ${city}` : iata;
 }
 function hubLabelHtml(label) {
@@ -2080,63 +2196,63 @@ function routePatternMetrics(d, id, pattern) {
 function routeRows(d, id) {
   const meta = AIRLINE_META_INFO[id] || {};
   const hubCoord = HUB_COORDS[d.origin] || AIRPORT_MASTER[d.origin]?.coords || meta.hubCoords || HUB_COORDS.TPE;
-  const hubLabel = HUB_LABELS[d.origin] || meta.hub || d.origin || "TPE";
+  const hubLabel = hubLabelText(d.origin) || meta.hub || d.origin || "TPE";
   const patterns = routeServicePatterns(d);
   const hasStopPattern = patterns.some(pattern => (pattern.stops || []).length > 0 || pattern.nonstop === false);
   const isMixedService = patterns.length > 1;
   const primaryMetrics = routePatternMetrics(d, id, patterns[0]);
   const rows = [
-    ["地區",   REGION_LABELS[d.region] || d.region],
-    [`距 ${hubLabel}`, primaryMetrics.distanceKm.toLocaleString() + " km"],
-    ["預估飛行時間", formatFlightMinutes(primaryMetrics.totalMinutes)],
-    ["座標",   fmtCoord(d.coords)],
+    [t("region"),   filterRegionLabel(d.region)],
+    [`${t("distFrom")} ${hubLabel}`, primaryMetrics.distanceKm.toLocaleString() + " km"],
+    [t("estFlightTime"), formatFlightMinutes(primaryMetrics.totalMinutes)],
+    [t("coordinates"),   fmtCoord(d.coords)],
   ];
 
   if (hasStopPattern) {
     if (isMixedService) {
-      rows.splice(1, 2, ["航線型態", "直飛與中停並行"]);
+      rows.splice(1, 2, [t("routeType"), t("mixedType")]);
       patterns.forEach(pattern => {
-        const flights = (pattern.flightNumbers || []).join("、") || "航班";
+        const flights = (pattern.flightNumbers || []).join("、") || t("flightNo");
         const stops = pattern.stops || [];
         const metrics = routePatternMetrics(d, id, pattern);
         const routeType = stops.length
-          ? `經 ${stops.map(airportRouteLabel).join("、")}`
-          : "直飛";
+          ? `${t("viaPrefix")} ${stops.map(airportRouteLabel).join("、")}`
+          : t("nonstop");
         const availability = pattern.status === "SCHEDULED"
-          ? ` · ${pattern.effectiveDate ? `${pattern.effectiveDate} 起` : "即將開航"}`
-          : pattern.status === "SEASONAL" ? " · 季節航班" : "";
+          ? ` · ${pattern.effectiveDate ? `${pattern.effectiveDate} ${t("effectiveFromSuffix")}` : t("comingSoon")}`
+          : pattern.status === "SEASONAL" ? ` ${t("seasonalSuffix")}` : "";
         rows.splice(rows.length - 1, 0, [flights, `${routeType}${availability} · ${metrics.distanceKm.toLocaleString()} km · ${formatFlightMinutes(metrics.totalMinutes)}`]);
       });
     } else {
       const stops = patterns[0].stops || [];
       const itinerary = [d.origin, ...stops, d.iata].map(airportRouteLabel).join(" → ");
-      rows.splice(1, 0, ["航線型態", `中停 ${stops.length} 次`], ["行程", itinerary]);
+      rows.splice(1, 0, [t("routeType"), t("stopsCount").replace("{n}", stops.length)], [t("itinerary"), itinerary]);
       if ((patterns[0].flightNumbers || []).length) {
-        rows.splice(3, 0, ["航班", patterns[0].flightNumbers.join("、")]);
+        rows.splice(3, 0, [t("flightNo"), patterns[0].flightNumbers.join("、")]);
       }
     }
   }
 
-  if (d.origin && d.origin !== (meta.hub || "TPE")) rows.push(["出發樞紐", HUB_LABELS[d.origin] || d.origin]);
-  if (d.status === "SUSPENDED") rows.unshift(["狀態", "⚠️ 目前停飛"]);
-  else if (d.status === "SEASONAL") rows.unshift(["狀態", "季節限定航班"]);
+  if (d.origin && d.origin !== (meta.hub || "TPE")) rows.push([t("departureHub"), hubLabelText(d.origin)]);
+  if (d.status === "SUSPENDED") rows.unshift([t("statusLabel"), t("suspendedStatus")]);
+  else if (d.status === "SEASONAL") rows.unshift([t("statusLabel"), t("seasonalStatus")]);
   else if (d.status === "SCHEDULED") {
     rows.unshift(
-      ["狀態", "🗓️ 即將開航"],
-      ["開航日期", d.effectiveDate || "待公布"]
+      [t("statusLabel"), t("scheduledStatus")],
+      [t("effectiveDate"), d.effectiveDate || t("tbd")]
     );
   }
 
   if (!hasStopPattern) {
     const flightNos = patterns[0].flightNumbers || [];
-    rows.push(["航班", flightNos.length ? flightNos.join("、") : "NIL"]);
+    rows.push([t("flightNo"), flightNos.length ? flightNos.join("、") : "NIL"]);
   }
-  const freqUnit = d.frequencyType === "weekly" ? "週" : (d.frequencyType || "");
+  const freqUnit = d.frequencyType === "weekly" ? t("weekUnit") : (d.frequencyType || "");
   rows.push(
-    ["每週班次", d.frequency != null ? `${d.frequency} 班/${freqUnit || "週"}` : "NIL"],
-    ["機場全名", d.airportName || "NIL"],
-    ["國家",     d.country || "NIL"],
-    ["所屬聯盟", meta.alliance || "NIL"],
+    [t("weeklyFreq"), d.frequency != null ? `${d.frequency} ${t("perWeekSuffix")}${freqUnit || t("weekUnit")}` : "NIL"],
+    [t("airportFullName"), d.airportName || "NIL"],
+    [t("country"),     d.country || "NIL"],
+    [t("alliance"), meta.alliance || "NIL"],
   );
   return rows;
 }
@@ -2146,7 +2262,7 @@ function routePopupHtml(d, id) {
     <div class="route-popup-shell">
       <div class="route-popup-header">
         <span class="route-popup-iata">${d.iata}</span>
-        <span class="route-popup-city">${d.city}</span>
+        <span class="route-popup-city">${cityName(d.iata, d.city)}</span>
       </div>
       <div class="route-popup-rows">
         ${routeRows(d, id).map(([k, v]) =>
@@ -2155,7 +2271,7 @@ function routePopupHtml(d, id) {
       </div>
       <button class="route-popup-log-btn" id="route-log-btn"
         onclick="logFlightFromPopup('${d.origin || "TPE"}','${d.iata}','${id}','${primaryFlightNo.replace(/'/g, "")}')">
-        ✓ 搭乘過，加入飛行紀錄
+        ${t("logFlightBtn")}
       </button>
     </div>
   `;
@@ -2168,11 +2284,11 @@ function originPickerHtml(candidates) {
     <div class="route-popup-shell">
       <div class="route-popup-header">
         <span class="route-popup-iata">${d0.iata}</span>
-        <span class="route-popup-city">${d0.city}</span>
+        <span class="route-popup-city">${cityName(d0.iata, d0.city)}</span>
       </div>
       <div class="origin-pick-list">
         ${candidates.map((c, i) =>
-          `<button class="origin-pick-btn" onclick="pickOrigin(${i})">${HUB_LABELS[c.origin] || c.origin}</button>`
+          `<button class="origin-pick-btn" onclick="pickOrigin(${i})">${hubLabelText(c.origin)}</button>`
         ).join("")}
       </div>
     </div>
@@ -2206,7 +2322,7 @@ function renderInfoCard(d, id) {
   const card = document.getElementById("info-card");
   card.style.borderColor = (meta.color || "#000") + "44";
   document.getElementById("card-iata").textContent = d.iata;
-  document.getElementById("card-city").textContent = d.city;
+  document.getElementById("card-city").textContent = cityName(d.iata, d.city);
 
   const rows = routeRows(d, id);
   const rowsEl = document.getElementById("card-rows");
@@ -2218,7 +2334,7 @@ function renderInfoCard(d, id) {
   const logBtn = document.getElementById("card-log-btn");
   logBtn.classList.remove("done");
   logBtn.disabled = false;
-  logBtn.textContent = "✓ 搭乘過，加入飛行紀錄";
+  logBtn.textContent = t("logFlightBtn");
   logBtn.onclick = () => logFlightFromPopup(d.origin || "TPE", d.iata, id, primaryFlightNo, logBtn);
 
   card.style.opacity = "1";
@@ -2451,6 +2567,51 @@ const HUB_LABELS = {
   DAD: "DAD 峴港",
   BOTH: "松山／桃園雙樞紐",
 };
+const HUB_LABELS_EN = {
+  IST: "IST Istanbul",
+  TPE: "TPE Taoyuan",
+  TSA: "TSA Songshan",
+  PVG: "PVG Pudong",
+  SHA: "SHA Hongqiao",
+  NKG: "NKG Nanjing",
+  NGB: "NGB Ningbo",
+  WUH: "WUH Wuhan",
+  TAO: "TAO Qingdao",
+  TFU: "TFU Chengdu Tianfu",
+  KMG: "KMG Kunming",
+  XIY: "XIY Xi'an",
+  PKX: "PKX Beijing Daxing",
+  NRT: "NRT Narita",
+  HND: "HND Haneda",
+  AUH: "AUH Abu Dhabi",
+  KIX: "KIX Osaka Kansai",
+  NGO: "NGO Nagoya",
+  FUK: "FUK Fukuoka",
+  CJU: "CJU Jeju",
+  GMP: "GMP Gimpo",
+  KHH: "KHH Kaohsiung",
+  ICN: "ICN Seoul Incheon",
+  PUS: "PUS Busan",
+  RMQ: "RMQ Taichung",
+  TNN: "TNN Tainan",
+  XMN: "XMN Xiamen",
+  FOC: "FOC Fuzhou",
+  HGH: "HGH Hangzhou",
+  HKG: "HKG Hong Kong",
+  AMS: "AMS Amsterdam",
+  HAN: "HAN Hanoi",
+  SGN: "SGN Ho Chi Minh City",
+  DAD: "DAD Da Nang",
+  BOTH: "Songshan/Taoyuan Dual Hub",
+};
+const AIRPORT_CITY_EN = {ACC:"Accra",ADD:"Addis Ababa",ADL:"Adelaide",AER:"Sochi",AGP:"Malaga",AKJ:"Asahikawa",AKL:"Auckland",ALA:"Almaty",ALG:"Algiers",AMD:"Ahmedabad",AMM:"Amman",AMS:"Amsterdam",AOJ:"Aomori",ARN:"Stockholm",ASM:"Asmara",ATH:"Athens",ATL:"Atlanta",AUH:"Abu Dhabi",AXT:"Akita",AYT:"Antalya",BAH:"Bahrain",BCN:"Barcelona",BEY:"Beirut",BKI:"Kota Kinabalu",BKK:"Bangkok",BLR:"Bangalore",BNE:"Brisbane",BOM:"Mumbai",BOS:"Boston",BRU:"Brussels",BUD:"Budapest",CAI:"Cairo",CAN:"Guangzhou",CCJ:"Kozhikode",CCU:"Kolkata",CDG:"Paris",CEB:"Cebu",CGO:"Zhengzhou",CGK:"Jakarta",CGQ:"Changchun",CHC:"Christchurch",CJJ:"Cheongju",CJU:"Jeju",CLT:"Charlotte",CMB:"Colombo",CMN:"Casablanca",CKG:"Chongqing",CNX:"Chiang Mai",COK:"Kochi",CPH:"Copenhagen",CRK:"Clark",CSX:"Changsha",CTS:"Sapporo",CNS:"Cairns",CXR:"Nha Trang",CTU:"Chengdu",DAC:"Dhaka",DAD:"Da Nang",DAM:"Damascus",DBB:"El Alamein",DEL:"New Delhi",DFW:"Dallas",DLC:"Dalian",DMM:"Dammam",DOH:"Doha",DPS:"Bali",DUB:"Dublin",DUS:"Dusseldorf",DWC:"Dubai",DXB:"Dubai",DYG:"Zhangjiajie",ELQ:"Qassim",EVN:"Yerevan",EZE:"Buenos Aires",FCO:"Rome",FBM:"Lubumbashi",FKS:"Fukushima",FOC:"Fuzhou",FRA:"Frankfurt",FUK:"Fukuoka",GMP:"Seoul",GUM:"Guam",GVA:"Geneva",GYD:"Baku",HAK:"Haikou",HAN:"Hanoi",HBE:"El Alamein",HFE:"Hefei",HGH:"Hangzhou",HIJ:"Hiroshima",HIN:"Sacheon",HKD:"Hakodate",HKG:"Hong Kong",HKT:"Phuket",HNA:"Hanamaki",HND:"Tokyo",HNL:"Honolulu",HRE:"Harare",HRB:"Harbin",HSG:"Saga",HSA:"Turkistan",HYD:"Hyderabad",IAD:"Washington",IAH:"Houston",IBR:"Ibaraki",ICN:"Seoul",ISB:"Islamabad",ISG:"Ishigaki",IST:"Istanbul",JAI:"Jaipur",JED:"Jeddah",JFK:"New York",JMK:"Mykonos",JNB:"Johannesburg",JTR:"Santorini",KBL:"Kabul",KBV:"Krabi",KCZ:"Kochi",KHH:"Kaohsiung",KHI:"Karachi",KIJ:"Niigata",KIX:"Osaka",KMG:"Kunming",KMI:"Miyazaki",KMJ:"Kumamoto",KMQ:"Komatsu",KNO:"Medan",KOJ:"Kagoshima",KPO:"Pohang",KRK:"Krakow",KTM:"Kathmandu",KUL:"Kuala Lumpur",KWI:"Kuwait City",KWJ:"Gwangju",KZN:"Kazan",LAS:"Las Vegas",LAX:"Los Angeles",LED:"St. Petersburg",LGW:"London",LHE:"Lahore",LHR:"London",LPQ:"Luang Prabang",LIS:"Lisbon",LUX:"Luxembourg",MAA:"Chennai",MAD:"Madrid",MAN:"Manchester",MCT:"Muscat",MDL:"Mandalay",MED:"Medina",MEL:"Melbourne",MFM:"Macau",MLE:"Male",MNL:"Manila",MRS:"Marseille",MUC:"Munich",MXP:"Milan",MYJ:"Matsuyama",NBO:"Nairobi",NCE:"Nice",NGO:"Nagoya",NGS:"Nagasaki",NHA:"Nha Trang",NGB:"Ningbo",NKG:"Nanjing",NRT:"Tokyo",OIT:"Oita",OKA:"Naha",OKJ:"Okayama",ONT:"Ontario",ORD:"Chicago",ORY:"Paris",OTP:"Bucharest",PEK:"Beijing",PEN:"Penang",PER:"Perth",PEW:"Peshawar",PHX:"Phoenix",PKX:"Beijing",PMI:"Palma de Mallorca",KTI:"Phnom Penh",PQC:"Phu Quoc",PRG:"Prague",PUS:"Busan",PVG:"Shanghai",RGN:"Yangon",RMQ:"Taichung",ROR:"Koror",RSU:"Yeosu",RUH:"Riyadh",SDJ:"Sendai",SEA:"Seattle",SFO:"San Francisco",SAI:"Siem Reap",SGN:"Ho Chi Minh City",SHA:"Shanghai",SHE:"Shenyang",SHI:"Shimojishima",SIN:"Singapore",SLL:"Salalah",SUB:"Surabaya",SVO:"Moscow",SYD:"Sydney",SZX:"Shenzhen",TAE:"Daegu",TAK:"Takamatsu",TAO:"Qingdao",TAS:"Tashkent",TBS:"Tbilisi",TFU:"Chengdu",TKS:"Tokushima",TOY:"Toyama",TLV:"Tel Aviv",TNN:"Tainan",TPE:"Taipei",TRV:"Thiruvananthapuram",TSA:"Taipei",TSN:"Tianjin",TTJ:"Tottori",TUN:"Tunis",UBN:"Ulaanbaatar",URC:"Urumqi",UKB:"Kobe",ULN:"Ulaanbaatar",USN:"Ulsan",VCE:"Venice",VIE:"Vienna",VTE:"Vientiane",WAW:"Warsaw",WEH:"Weihai",WNZ:"Wenzhou",WUH:"Wuhan",XIY:"Xi'an",XMN:"Xiamen",YGJ:"Yonago",YNJ:"Yanji",YNT:"Yantai",YVR:"Vancouver",YYC:"Calgary",YYZ:"Toronto",ZNZ:"Zanzibar",ZRH:"Zurich",EWR:"New York",DEN:"Denver",DTW:"Detroit",MSP:"Minneapolis",MIA:"Miami",MCO:"Orlando",RDU:"Raleigh-Durham",YUL:"Montreal",YOW:"Ottawa",YQB:"Quebec City",MEX:"Mexico City",SJO:"San Jose",PUJ:"Punta Cana",GIG:"Rio de Janeiro",FOR:"Fortaleza",SSA:"Salvador",GRU:"Sao Paulo",SCL:"Santiago",BOG:"Bogota",PTY:"Panama City",LIM:"Lima",CAY:"Cayenne",PPT:"Papeete",ABJ:"Abidjan",ABV:"Abuja",JRO:"Kilimanjaro",BZV:"Brazzaville",FIH:"Kinshasa",PNR:"Pointe-Noire",DLA:"Douala",NSI:"Yaounde",NDJ:"N'Djamena",SSG:"Malabo",COO:"Cotonou",LBV:"Libreville",LFW:"Lome",RUN:"Saint-Denis",PTP:"Pointe-a-Pitre",FDF:"Fort-de-France",ITM:"Osaka",WKJ:"Wakkanai",MBE:"Monbetsu",MMB:"Memanbetsu",SHB:"Nakashibetsu",KUH:"Kushiro",OBO:"Obihiro",ONJ:"Odate-Noshiro",SYO:"Shonai",NTQ:"Noto",HAC:"Hachijojima",IWK:"Iwakuni",UBJ:"Yamaguchi Ube",IWJ:"Iwami",KKJ:"Kitakyushu",MMY:"Miyako",FSZ:"Shizuoka",RIS:"Rishiri",FUJ:"Fukue",TSJ:"Tsushima",ALP:"Aleppo",AQJ:"Aqaba",ASB:"Ashgabat",BEG:"Belgrade",BEN:"Benghazi",BER:"Berlin",BGW:"Baghdad",BHK:"Bukhara",BHX:"Birmingham",BIO:"Bilbao",BJL:"Banjul",BLL:"Billund",BLQ:"Bologna",BOD:"Bordeaux",BRE:"Bremen",BRI:"Bari",BSL:"Basel",BSR:"Basra",BSZ:"Bishkek",BUS:"Batumi",CCS:"Caracas",CGN:"Cologne",CKY:"Conakry",CLJ:"Cluj-Napoca",CND:"Constanta",CPT:"Cape Town",CTA:"Catania",CUN:"Cancun",CZL:"Constantine",DAR:"Dar es Salaam",DBV:"Dubrovnik",DSS:"Dakar",DYU:"Dushanbe",EBB:"Entebbe",EBL:"Erbil",ECN:"Ercan",EDI:"Edinburgh",FEG:"Fergana",GOT:"Gothenburg",HAJ:"Hannover",HAM:"Hamburg",HAV:"Havana",HEL:"Helsinki",IFN:"Isfahan",IKA:"Tehran",ISU:"Sulaymaniyah",JIB:"Djibouti",JUB:"Juba",KGL:"Kigali",LEJ:"Leipzig",LJU:"Ljubljana",LOS:"Lagos",LYS:"Lyon",MBA:"Mombasa",MGQ:"Mogadishu",MHD:"Mashhad",MJI:"Tripoli",MLA:"Malta",MRA:"Misrata",MRU:"Mauritius",MSQ:"Minsk",NAP:"Naples",NBJ:"Luanda",NIM:"Niamey",NJF:"Najaf",NQZ:"Astana",NKC:"Nouakchott",NUE:"Nuremberg",OHD:"Ohrid",OPO:"Porto",ORN:"Oran",OSL:"Oslo",OUA:"Ouagadougou",PMO:"Palermo",PRN:"Pristina",PZU:"Port Sudan",RAK:"Marrakesh",RIX:"Riga",RMO:"Chisinau",RVN:"Rovaniemi",SEZ:"Seychelles",SJJ:"Sarajevo",SKD:"Samarkand",SKG:"Thessaloniki",SKP:"Skopje",SOF:"Sofia",SSH:"Sharm El Sheikh",STN:"London",STR:"Stuttgart",SVQ:"Seville",SYZ:"Shiraz",SZG:"Salzburg",TBZ:"Tabriz",TGD:"Podgorica",TIA:"Tirana",TIF:"Taif",TIV:"Tivat",TLL:"Tallinn",TLS:"Toulouse",TRN:"Turin",TSR:"Timisoara",UGC:"Urgench",VAR:"Varna",VKO:"Moscow",VLC:"Valencia",VNO:"Vilnius",YNB:"Yanbu",ZAG:"Zagreb",BEL:"Belem",SPU:"Split",KTT:"Kittila",AJA:"Ajaccio",BIA:"Bastia",BIQ:"Biarritz",BES:"Brest",CFR:"Caen",CLY:"Calvi",CFE:"Clermont-Ferrand",FSC:"Figari",MPL:"Montpellier",NTE:"Nantes",PUF:"Pau",RNS:"Rennes",HER:"Heraklion",RHO:"Rhodes",ORK:"Cork",CAG:"Cagliari",FLR:"Florence",LIN:"Milan",OLB:"Olbia",VRN:"Verona",TNR:"Antananarivo",RBA:"Rabat",TNG:"Tangier",BGO:"Bergen",TOS:"Tromso",FAO:"Faro",SXM:"Sint Maarten",IBZ:"Ibiza",TFS:"Tenerife",NCL:"Newcastle",BMV:"Buon Ma Thuot",DIN:"Dien Bien Phu",DLI:"Da Lat",HPH:"Hai Phong",HUI:"Hue",PXU:"Pleiku",TBB:"Tuy Hoa",THD:"Thanh Hoa",UIH:"Quy Nhon",VCL:"Chu Lai",VCA:"Can Tho",VCS:"Con Dao",VDH:"Dong Hoi",VII:"Vinh",AUA:"Aruba",BGI:"Bridgetown",YEG:"Edmonton",BON:"Kralendijk",CTG:"Cartagena",CUR:"Willemstad",LCA:"Larnaca",AAL:"Aalborg",GYE:"Guayaquil",UIO:"Quito",GEO:"Georgetown",GOA:"Genoa",JER:"Jersey",AES:"Alesund",KRS:"Kristiansand",SVG:"Stavanger",TRD:"Trondheim",GDN:"Gdansk",POZ:"Poznan",WRO:"Wroclaw",ALC:"Alicante",OVD:"Asturias",SCQ:"Santiago de Compostela",PBM:"Paramaribo",LPI:"Linkoping",POS:"Port of Spain",ABZ:"Aberdeen",BHD:"Belfast",BRS:"Bristol",CWL:"Cardiff",MME:"Durham Tees Valley",EXT:"Exeter",GLA:"Glasgow",HUY:"Humberside",INV:"Inverness",LBA:"Leeds",LCY:"London",NWI:"Norwich",SOU:"Southampton",AUS:"Austin",PDX:"Portland",SLC:"Salt Lake City",SAN:"San Diego",VVO:"Vladivostok"};
+function cityName(iata, fallbackZh) {
+  if (LANG === "en") return AIRPORT_CITY_EN[iata] || fallbackZh || iata;
+  return fallbackZh || iata;
+}
+function hubLabelText(key) {
+  return (LANG === "en" ? HUB_LABELS_EN[key] : HUB_LABELS[key]) || key;
+}
 // 航空公司清單由 AIRLINE_META 自動衍生排序：主場樞紐（TPE/RMQ/TSA）優先，其餘依英文商業名稱（commercialName）A→Z。
 // 新增航空公司只需要在 airline-data.js 的 AIRLINE_META 裡加一筆，這裡會自動排進正確位置，不用手動維護陣列。
 const HOME_HUBS = new Set(["TPE", "RMQ", "TSA"]);
@@ -2472,11 +2633,12 @@ function airlineCommercialName(id) {
 // ── FILTER STATE ──────────────────────────────────────────────────────────────
 const DEFAULT_ROUTE_STATUSES = new Set(["ACTIVE", "SEASONAL"]);
 const ROUTE_STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "正常營運" },
-  { value: "SEASONAL", label: "季節航班" },
-  { value: "SCHEDULED", label: "即將開航" },
-  { value: "SUSPENDED", label: "目前停飛" },
+  { value: "ACTIVE", label: "正常營運", labelEn: "Active" },
+  { value: "SEASONAL", label: "季節航班", labelEn: "Seasonal" },
+  { value: "SCHEDULED", label: "即將開航", labelEn: "Upcoming" },
+  { value: "SUSPENDED", label: "目前停飛", labelEn: "Suspended" },
 ];
+function routeStatusLabel(opt) { return (LANG === "en" ? opt.labelEn : opt.label) || opt.label; }
 const REGION_LABEL_FALLBACK = {
   JAPAN: "日本", KOREA: "韓國", CHINA: "中國大陸", HONG_KONG_MACAU: "港澳",
   NORTHEAST_ASIA: "東北亞", NE_ASIA: "東北亞", SOUTHEAST_ASIA: "東南亞", SEA: "東南亞",
@@ -2497,7 +2659,15 @@ function routeStatusKey(d) {
   if (d && d.status === "SCHEDULED") return "SCHEDULED";
   return "ACTIVE";
 }
+const REGION_LABEL_FALLBACK_EN = {
+  JAPAN: "Japan", KOREA: "Korea", CHINA: "China", HONG_KONG_MACAU: "Hong Kong & Macau",
+  NORTHEAST_ASIA: "Northeast Asia", NE_ASIA: "Northeast Asia", SOUTHEAST_ASIA: "Southeast Asia", SEA: "Southeast Asia",
+  SOUTH_ASIA: "South Asia", CENTRAL_ASIA: "Central Asia", MIDDLE_EAST: "Middle East", EUROPE: "Europe",
+  NORTH_AMERICA: "North America", SOUTH_AMERICA: "South America", OCEANIA: "Oceania", AFRICA: "Africa",
+  DOMESTIC: "Domestic", TAIWAN: "Taiwan"
+};
 function filterRegionLabel(region) {
+  if (LANG === "en") return REGION_LABEL_FALLBACK_EN[region] || String(region || "Uncategorized").replace(/_/g, " ");
   if (typeof REGION_LABELS !== "undefined" && REGION_LABELS && REGION_LABELS[region]) return REGION_LABELS[region];
   if (REGION_LABEL_FALLBACK[region]) return REGION_LABEL_FALLBACK[region];
   return String(region || "未分類").replace(/_/g, " ");
@@ -2538,7 +2708,7 @@ function renderFilterPanel() {
   const originCounts = optionCounts(routes, d => d.origin || "UNKNOWN");
   const regionCounts = optionCounts(routes, d => d.region || "UNKNOWN");
   const statusCounts = optionCounts(routes, routeStatusKey);
-  const origins = [...originCounts.keys()].sort((a, b) => (HUB_LABELS[a] || a).localeCompare(HUB_LABELS[b] || b, "zh-Hant"));
+  const origins = [...originCounts.keys()].sort((a, b) => hubLabelText(a).localeCompare(hubLabelText(b), LANG === "en" ? "en" : "zh-Hant"));
   const regions = [...regionCounts.keys()].sort((a, b) => filterRegionLabel(a).localeCompare(filterRegionLabel(b), "zh-Hant"));
 
   const groups = document.getElementById("filter-groups");
@@ -2548,26 +2718,26 @@ function renderFilterPanel() {
   const statusAll = routeFilters.statuses.size === 0;
   groups.innerHTML = `
     <div class="filter-group">
-      <div class="filter-group-head"><span class="filter-group-title">出發機場</span><span class="filter-group-note">同組可複選</span></div>
+      <div class="filter-group-head"><span class="filter-group-title">${t('filterOrigin')}</span><span class="filter-group-note">${t('filterOriginNote')}</span></div>
       <div class="filter-chip-list">
-        ${filterChipHtml("origins", "__ALL__", "全部", routes.length, originAll)}
-        ${origins.map(origin => filterChipHtml("origins", origin, HUB_LABELS[origin] || origin, originCounts.get(origin), routeFilters.origins.has(origin))).join("")}
+        ${filterChipHtml("origins", "__ALL__", t('filterAll'), routes.length, originAll)}
+        ${origins.map(origin => filterChipHtml("origins", origin, hubLabelText(origin), originCounts.get(origin), routeFilters.origins.has(origin))).join("")}
       </div>
     </div>
     <div class="filter-group">
-      <div class="filter-group-head"><span class="filter-group-title">地區</span><span class="filter-group-note">依資料分類</span></div>
+      <div class="filter-group-head"><span class="filter-group-title">${t('filterRegionTitle')}</span><span class="filter-group-note">${t('filterRegionNote')}</span></div>
       <div class="filter-chip-list">
-        ${filterChipHtml("regions", "__ALL__", "全部", routes.length, regionAll)}
+        ${filterChipHtml("regions", "__ALL__", t('filterAll'), routes.length, regionAll)}
         ${regions.map(region => filterChipHtml("regions", region, filterRegionLabel(region), regionCounts.get(region), routeFilters.regions.has(region))).join("")}
       </div>
     </div>
     <div class="filter-group">
-      <div class="filter-group-head"><span class="filter-group-title">航線狀態</span><span class="filter-group-note">預設隱藏停飛與未開航</span></div>
+      <div class="filter-group-head"><span class="filter-group-title">${t('filterStatusTitle')}</span><span class="filter-group-note">${t('filterStatusNote')}</span></div>
       <div class="filter-chip-list">
-        ${filterChipHtml("statuses", "__ALL__", "全部", routes.length, statusAll)}
-        ${ROUTE_STATUS_OPTIONS.map(opt => filterChipHtml("statuses", opt.value, opt.label, statusCounts.get(opt.value) || 0, routeFilters.statuses.has(opt.value))).join("")}
+        ${filterChipHtml("statuses", "__ALL__", t('filterAll'), routes.length, statusAll)}
+        ${ROUTE_STATUS_OPTIONS.map(opt => filterChipHtml("statuses", opt.value, routeStatusLabel(opt), statusCounts.get(opt.value) || 0, routeFilters.statuses.has(opt.value))).join("")}
       </div>
-      <div id="filter-empty">目前條件沒有符合航線，可按「重設篩選」恢復預設。</div>
+      <div id="filter-empty" data-i18n="filterEmptyMsg">目前條件沒有符合航線，可按「重設篩選」恢復預設。</div>
     </div>`;
   updateFilterSummary();
 }
@@ -2734,7 +2904,7 @@ window.addEventListener("DOMContentLoaded", () => {
     .bindTooltip(hubLabelHtml("PVG 浦東"), { permanent:true, direction:"right", offset:[9,0] });
   ["SHA","NKG","NGB","WUH","TAO","TFU","KMG","XIY","PKX"].forEach(origin => {
     hubMarkers[`MU_${origin}`] = L.circleMarker(HUB_COORDS[origin], { radius:6, color:"#d10000", fillColor:"#fff", fillOpacity:1, weight:2, interactive:false })
-      .bindTooltip(hubLabelHtml(HUB_LABELS[origin]), { permanent:true, direction:"right", offset:[7,0] });
+      .bindTooltip(hubLabelHtml(hubLabelText(origin)), { permanent:true, direction:"right", offset:[7,0] });
   });
   hubMarkers["MF_XMN"] = L.circleMarker(HUB_COORDS.XMN, { radius:8, color:"#0072BC", fillColor:"#0072BC", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml("XMN 廈門"), { permanent:true, direction:"right", offset:[9,0] });
@@ -3089,48 +3259,54 @@ const ASIA_ACHIEVEMENT_REGIONS = new Set([
   "TAIWAN", "JAPAN", "NORTHEAST_ASIA", "CHINA", "HONGKONG_MACAU",
   "PHILIPPINES", "SOUTHEAST_ASIA", "SOUTH_ASIA", "CENTRAL_ASIA", "MIDDLE_EAST"
 ]);
+function achTitle(def) {
+  return (LANG === "en" ? def.titleEn : def.title) || def.title;
+}
+function achDifficulty(def) {
+  return (LANG === "en" ? def.difficultyEn : def.difficulty) || def.difficulty;
+}
 const ACHIEVEMENT_DEFINITIONS = [
   {
-    id: "japanBeginner", title: "日本初心者", code: "JP", type: "regionAirports",
+    id: "japanBeginner", title: "日本初心者", titleEn: "Japan Beginner", code: "JP", type: "regionAirports",
     region: "JAPAN", target: 3, badge: "assets/badges/japan-beginner.png"
   },
   {
-    id: "northeastAsiaTraveler", title: "東北亞旅人", code: "NEA", type: "regionGroupAirports",
+    id: "northeastAsiaTraveler", title: "東北亞旅人", titleEn: "Northeast Asia Traveler", code: "NEA", type: "regionGroupAirports",
     regions: ["JAPAN", "NORTHEAST_ASIA"], target: 10, countryTarget: 2,
-    difficulty: "中級", badge: "assets/badges/japan-traveler.png"
+    difficulty: "中級", difficultyEn: "Intermediate", badge: "assets/badges/japan-traveler.png"
   },
   {
-    id: "japanMaster", title: "日本達人", code: "JP★", type: "regionAirports",
+    id: "japanMaster", title: "日本達人", titleEn: "Japan Master", code: "JP★", type: "regionAirports",
     region: "JAPAN", target: 20, badge: "assets/badges/japan-master.png"
   },
   {
-    id: "airlineCollector", title: "航司收藏家", code: "AL", type: "airlines",
+    id: "airlineCollector", title: "航司收藏家", titleEn: "Airline Collector", code: "AL", type: "airlines",
     target: 5, badge: "assets/badges/airline-collector.png"
   },
   {
-    id: "asiaExplorer", title: "亞洲探險家", code: "AS", type: "asiaExplorer",
+    id: "asiaExplorer", title: "亞洲探險家", titleEn: "Asia Explorer", code: "AS", type: "asiaExplorer",
     airportTarget: 10, countryTarget: 4, badge: "assets/badges/asia-explorer.png"
   },
   {
-    id: "rareDestination", title: "冷門航點發掘者", code: "RARE", type: "rareAirports",
+    id: "rareDestination", title: "冷門航點發掘者", titleEn: "Rare Destination Finder", code: "RARE", type: "rareAirports",
     target: 5, maxAirlines: 1, badge: "assets/badges/rare-destination.png"
   },
   {
-    id: "snowTrio", title: "雪國三重奏", code: "SNOW", type: "requiredAirports",
-    airports: ["CTS", "AOJ", "AXT"], difficulty: "高級", hidden: true,
-    hiddenHint: "當三座北國機場被雪花串連……",
+    id: "snowTrio", title: "雪國三重奏", titleEn: "Snow Country Trio", code: "SNOW", type: "requiredAirports",
+    airports: ["CTS", "AOJ", "AXT"], difficulty: "高級", difficultyEn: "Advanced", hidden: true,
+    hiddenHint: "當三座北國機場被雪花串連……", hiddenHintEn: "When three northern snow airports are linked by snowflakes…",
     badge: "assets/badges/snow-trio.png"
   },
   {
-    id: "silkRoadTraveler", title: "絲路時空旅人", code: "SILK", type: "requiredAirports",
-    airports: ["XIY", "TAS", "IST"], difficulty: "高級", hidden: true,
-    hiddenHint: "沿著古老商旅的足跡，從東方走向歐亞交界……",
+    id: "silkRoadTraveler", title: "絲路時空旅人", titleEn: "Silk Road Voyager", code: "SILK", type: "requiredAirports",
+    airports: ["XIY", "TAS", "IST"], difficulty: "高級", difficultyEn: "Advanced", hidden: true,
+    hiddenHint: "沿著古老商旅的足跡，從東方走向歐亞交界……", hiddenHintEn: "Follow the ancient caravan trail, from the East toward the Eurasian crossroads…",
     badge: "assets/badges/silk-road-traveler.png"
   },
   {
-    id: "europeRomance", title: "歐洲浪漫三部曲", code: "EURO", type: "requiredAirports",
-    airports: ["CDG", "VIE", "FCO"], difficulty: "高級", hidden: true,
-    hiddenHint: "收藏藝術、音樂與古文明的三座名城……",
+    id: "europeRomance", title: "歐洲浪漫三部曲", titleEn: "European Romance Trilogy", code: "EURO", type: "requiredAirports",
+    airports: ["CDG", "VIE", "FCO"], difficulty: "高級", difficultyEn: "Advanced", hidden: true,
+    hiddenHint: "收藏藝術、音樂與古文明的三座名城……", hiddenHintEn: "Collect three great cities of art, music, and ancient civilization…",
     badge: "assets/badges/europe-romance.png"
   }
 ];
@@ -3253,17 +3429,30 @@ async function cloudPullAndMerge() {
 
 function achievementDescription(definition) {
   const descriptions = {
-    japanBeginner: "探索 3 個不同的日本航點。",
-    northeastAsiaTraveler: "探索 10 個日本或韓國航點，並涵蓋兩個國家。",
-    japanMaster: "探索 20 個不同的日本航點。",
-    airlineCollector: "探索 5 家不同航空公司的航線。",
-    asiaExplorer: "探索 10 個亞洲航點，並涵蓋至少 4 個國家或地區。",
-    rareDestination: "探索 5 個在目前航網中僅有 1 家航司服務的航點。",
-    snowTrio: "探索札幌新千歲 CTS、青森 AOJ、秋田 AXT。",
-    silkRoadTraveler: "探索西安 XIY、塔什干 TAS、伊斯坦堡 IST。",
-    europeRomance: "探索巴黎 CDG、維也納 VIE、羅馬 FCO。"
+    zh: {
+      japanBeginner: "探索 3 個不同的日本航點。",
+      northeastAsiaTraveler: "探索 10 個日本或韓國航點，並涵蓋兩個國家。",
+      japanMaster: "探索 20 個不同的日本航點。",
+      airlineCollector: "探索 5 家不同航空公司的航線。",
+      asiaExplorer: "探索 10 個亞洲航點，並涵蓋至少 4 個國家或地區。",
+      rareDestination: "探索 5 個在目前航網中僅有 1 家航司服務的航點。",
+      snowTrio: "探索札幌新千歲 CTS、青森 AOJ、秋田 AXT。",
+      silkRoadTraveler: "探索西安 XIY、塔什干 TAS、伊斯坦堡 IST。",
+      europeRomance: "探索巴黎 CDG、維也納 VIE、羅馬 FCO。"
+    },
+    en: {
+      japanBeginner: "Visit 3 different airports in Japan.",
+      northeastAsiaTraveler: "Visit 10 airports across Japan and Korea, covering both countries.",
+      japanMaster: "Visit 20 different airports in Japan.",
+      airlineCollector: "Fly routes from 5 different airlines.",
+      asiaExplorer: "Visit 10 airports in Asia, covering at least 4 countries or regions.",
+      rareDestination: "Visit 5 airports served by only 1 airline in the current network.",
+      snowTrio: "Visit New Chitose CTS, Aomori AOJ, and Akita AXT.",
+      silkRoadTraveler: "Visit Xi'an XIY, Tashkent TAS, and Istanbul IST.",
+      europeRomance: "Visit Paris CDG, Vienna VIE, and Rome FCO."
+    },
   };
-  return descriptions[definition.id] || "完成指定的航線探索條件。";
+  return descriptions[LANG]?.[definition.id] || descriptions.zh[definition.id] || t("achDefaultDesc");
 }
 
 function achievementGalleryProgressText(definition, progress) {
@@ -3325,7 +3514,7 @@ function renderAchievementGallery() {
   if (!grid || !summary) return;
   const state = reconcileAchievementState(loadAchievementState());
   const unlockedCount = ACHIEVEMENT_DEFINITIONS.filter(item => state.achievements[item.id]?.unlocked).length;
-  summary.innerHTML = `<strong>${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}</strong> 枚徽章已解鎖 · 點選航點即可累積探索進度`;
+  summary.innerHTML = `<strong>${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}</strong> ${t("badgeSummary")}`;
   refreshAchievementGalleryButton(state);
 
   grid.innerHTML = ACHIEVEMENT_DEFINITIONS.map(definition => {
@@ -3337,22 +3526,22 @@ function renderAchievementGallery() {
     const date = formatAchievementDate(record.unlockedAt);
     const badgeMarkup = concealed
       ? `<span class="achievement-gallery-image-fallback" aria-hidden="true">?</span>`
-      : `<img src="${definition.badge}" alt="${definition.title}徽章"
+      : `<img src="${definition.badge}" alt="${achTitle(definition)}徽章"
           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
         <span class="achievement-gallery-image-fallback" aria-hidden="true">${definition.code}</span>`;
     const status = concealed ? "SECRET ACHIEVEMENT" : (unlocked ? "ACHIEVEMENT UNLOCKED" : "CHALLENGE IN PROGRESS");
-    const difficulty = definition.difficulty ? ` · ${definition.difficulty}` : "";
-    const progressText = concealed ? "隱藏條件尚未揭曉" : achievementGalleryProgressText(definition, progress);
+    const difficulty = definition.difficulty ? ` · ${achDifficulty(definition)}` : "";
+    const progressText = concealed ? t("hiddenNotRevealed") : achievementGalleryProgressText(definition, progress);
     return `<article class="achievement-gallery-card ${unlocked ? "unlocked" : "locked"} ${concealed ? "secret" : ""}">
       <div class="achievement-gallery-badge">
         ${badgeMarkup}
       </div>
       <div class="achievement-gallery-status">${status}${difficulty}</div>
-      <h3>${concealed ? "？？？" : definition.title}</h3>
-      <p class="achievement-gallery-description">${concealed ? definition.hiddenHint : achievementDescription(definition)}</p>
+      <h3>${concealed ? "？？？" : achTitle(definition)}</h3>
+      <p class="achievement-gallery-description">${concealed ? (LANG === "en" ? (definition.hiddenHintEn || definition.hiddenHint) : definition.hiddenHint) : achievementDescription(definition)}</p>
       <div class="achievement-gallery-progress-row"><span>${progressText}</span><span>${concealed ? "?" : `${ratio}%`}</span></div>
       <div class="achievement-gallery-progress" aria-label="${concealed ? "隱藏進度" : `完成度 ${ratio}%`}"><span style="width:${concealed ? 0 : ratio}%"></span></div>
-      <div class="achievement-gallery-date">${unlocked ? (date ? `解鎖於 ${date}` : "已解鎖") : "尚未解鎖"}</div>
+      <div class="achievement-gallery-date">${unlocked ? (date ? `${t("unlockedOn")} ${date}` : t("unlocked")) : t("notUnlocked")}</div>
     </article>`;
   }).join("");
 }
@@ -3391,7 +3580,7 @@ function switchGalleryTab(tab) {
     if (titleEl) titleEl.textContent = "成就圖鑑";
     const state = reconcileAchievementState(loadAchievementState());
     const unlockedCount = ACHIEVEMENT_DEFINITIONS.filter(item => state.achievements[item.id]?.unlocked).length;
-    if (summaryEl) summaryEl.innerHTML = `<strong>${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}</strong> 枚徽章已解鎖 · 點選航點即可累積探索進度`;
+    if (summaryEl) summaryEl.innerHTML = `<strong>${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}</strong> ${t("badgeSummary")}`;
   }
 
   if (isFlight) {
@@ -3538,7 +3727,7 @@ function achievementProgress(definition, state) {
 }
 
 function achievementDetail(definition, progress, justUnlocked) {
-  if (justUnlocked) return `達成條件，成功解鎖「${definition.title}」徽章！`;
+  if (justUnlocked) return `達成條件，成功解鎖「${achTitle(definition)}」徽章！`;
   if (definition.type === "regionGroupAirports") {
     return `已探索 ${progress.count}/${progress.target} 個東北亞航點，涵蓋 ${progress.countryCount}/${progress.countryTarget} 個國家。`;
   }
@@ -3598,7 +3787,7 @@ function showNextAchievementToast() {
     ? `${Math.min(progress.count, progress.target)}/${progress.target} 航點 · ${Math.min(progress.countryCount, progress.countryTarget)}/${progress.countryTarget} 地區`
     : `${Math.min(progress.count, progress.target)}/${progress.target}`;
   document.getElementById("achievement-kicker").textContent = justUnlocked ? "Achievement unlocked" : "Challenge progress";
-  document.getElementById("achievement-title").textContent = definition.title;
+  document.getElementById("achievement-title").textContent = achTitle(definition);
   document.getElementById("achievement-detail").textContent = achievementDetail(definition, progress, justUnlocked);
   toast.classList.toggle("unlocked", justUnlocked);
   toast.classList.add("show");
@@ -3676,7 +3865,7 @@ function hideCard() {
 function globalSearchStatusLabel(d) {
   const key = routeStatusKey(d);
   const option = ROUTE_STATUS_OPTIONS.find(x => x.value === key);
-  const label = option ? option.label : "正常營運";
+  const label = option ? routeStatusLabel(option) : (LANG === "en" ? "Active" : "正常營運");
   return key === "SCHEDULED" && d.effectiveDate ? `${label} · ${d.effectiveDate}` : label;
 }
 
@@ -3731,13 +3920,13 @@ function onSearch(val) {
   resultsEl.innerHTML = hits.map(({ id, d }) => {
     const meta = AIRLINE_META_INFO[id] || {};
     const airlineName = airlineCommercialName(id);
-    const originLabel = HUB_LABELS[d.origin] || d.origin || "—";
+    const originLabel = hubLabelText(d.origin) || "—";
     const status = globalSearchStatusLabel(d);
     return `<div class="global-result-item" style="--airline-color:${meta.color || "#6ea8ff"}"
       onclick="selectGlobalRoute('${id}','${d.iata}','${d.origin || ""}')">
       <span class="global-airline-code">${id}</span>
       <span class="global-result-main">
-        <span class="global-result-route"><span>${originLabel.split(" ")[0]}</span><span>→</span><span>${d.iata}</span><span class="global-result-city">${d.city || ""}</span></span>
+        <span class="global-result-route"><span>${originLabel.split(" ")[0]}</span><span>→</span><span>${d.iata}</span><span class="global-result-city">${cityName(d.iata, d.city) || ""}</span></span>
         <span class="global-result-airline">${airlineName}</span>
       </span>
       <span class="global-result-status">${status}</span>
@@ -3855,7 +4044,7 @@ function renderFlightLogRecords(rows) {
 
   const arrCounts = {};
   rows.forEach(r => { if (r.arr_iata) arrCounts[r.arr_iata] = (arrCounts[r.arr_iata] || 0) + 1; });
-  const topArr = Object.keys(arrCounts).sort((a, b) => arrCounts[b] - arrCounts[a])[0];
+  const topArr = Object.keys(arrCounts).sort((a, b) => arrCounts[b] - arrCounts[a])[1];
 
   const totalDistance = rows.reduce((sum, r) => sum + (r.distance_km || 0), 0);
   const totalMinutes = rows.reduce((sum, r) => sum + (r.distance_km ? estimateFlightMinutes(r.distance_km) : 0), 0);
@@ -4057,7 +4246,7 @@ function loadMoreFlightLogGroups() {
 function renderTimelineGroup(g, isLatest) {
   const d = new Date(g.date + 'T00:00:00');
   const md = `${d.getMonth() + 1}/${d.getDate()}`;
-  const weekday = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'][d.getDay()];
+  const weekday = (LANG === "en" ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['週日', '週一', '週二', '週三', '週四', '週五', '週六'])[d.getDay()];
   const cardsHtml = g.trips.map(t => renderTicketCard(t.legs, t.crossYear)).join('');
   return `
     <div class="timeline-group">
@@ -4079,7 +4268,7 @@ function shortDate(dateStr) {
 }
 
 function cityOf(iata) {
-  return window.AIRPORT_MASTER?.[iata]?.city || iata;
+  return cityName(iata, window.AIRPORT_MASTER?.[iata]?.city) || iata;
 }
 
 
@@ -4095,7 +4284,7 @@ function renderTicketCard(legs, crossYear) {
     ? `${first.flight_date} — ${shortDate(last.flight_date)}（${tripDays} 天）`
     : first.flight_date;
 
-  const legLabels = isSimpleRoundTrip ? ['去程', '回程'] : (isMultiLeg ? legs.map((_, i) => `第${i + 1}段`) : ['單程']);
+  const legLabels = isSimpleRoundTrip ? [t("legOutbound"), t("legInbound")] : (isMultiLeg ? legs.map((_, i) => t("legN").replace("{n}", i + 1)) : [t("legOneWay")]);
   const legRowsHtml = legs.map((r, i) => {
     const meta = window.AIRLINE_META?.[r.airline_id];
     const airlineName = meta?.commercialName || meta?.fullName || meta?.shortName || '';
@@ -4116,7 +4305,7 @@ function renderTicketCard(legs, crossYear) {
     ? `<div class="ticket-note">${legs.map(r => r.note).filter(Boolean).map(escHtml).join(' / ')}</div>`
     : '';
 
-  const badgeLabel = isSimpleRoundTrip ? '往返' : (isMultiLeg ? '多城市' : '單程');
+  const badgeLabel = isSimpleRoundTrip ? t("tripRoundTrip") : (isMultiLeg ? t("tripMultiCity") : t("legOneWay"));
   const headerArrIata = first.arr_iata;
   const cardKey = first.id;
   const isSelected = flightLogSelectMode && flightLogSelectedKeys.has(cardKey);
@@ -4124,8 +4313,8 @@ function renderTicketCard(legs, crossYear) {
 
   return `
     <div class="ticket-card${isSelected ? ' selected' : ''}" data-card-key="${cardKey}">
-      <div class="ticket-checkbox" onclick="toggleCardSelection(event, '${cardKey}')" aria-label="選取這張卡片"></div>
-      <div class="ticket-badge">${badgeLabel}${crossYear ? '<span class="ticket-badge-cross-year">跨年</span>' : ''}</div>
+      <div class="ticket-checkbox" onclick="toggleCardSelection(event, '${cardKey}')" aria-label="${t("selectCard")}"></div>
+      <div class="ticket-badge">${badgeLabel}${crossYear ? `<span class="ticket-badge-cross-year">${t("crossYearBadge")}</span>` : ''}</div>
       <div class="ticket-daterange">${dateRangeText}</div>
       <div class="ticket-route">
         <div class="ticket-endpoint">
@@ -4141,7 +4330,7 @@ function renderTicketCard(legs, crossYear) {
       <div class="ticket-divider"></div>
       ${legRowsHtml}
       ${noteHtml}
-      <button class="ticket-edit-btn" type="button" onclick="${editBtnOnclick}" aria-label="編輯紀錄">
+      <button class="ticket-edit-btn" type="button" onclick="${editBtnOnclick}" aria-label="${t('editRecord')}">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2-7.5 7.5-2.6.6.6-2.6 7.5-7.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -4160,7 +4349,7 @@ function toggleFlightLogSelectMode() {
   const toggleBtn = document.getElementById('flight-log-select-toggle');
   if (toggleBtn) {
     toggleBtn.classList.toggle('active', flightLogSelectMode);
-    const label = flightLogSelectMode ? '取消選取' : '選取';
+    const label = flightLogSelectMode ? t('cancelSelect') : t('select');
     toggleBtn.setAttribute('aria-label', label);
     toggleBtn.setAttribute('title', label);
   }
@@ -4185,7 +4374,7 @@ function updateFlightLogMergeBar() {
   if (!bar) return;
   const count = flightLogSelectedKeys.size;
   bar.classList.toggle('show', flightLogSelectMode && count > 0);
-  if (countEl) countEl.textContent = `已選 ${count} 筆`;
+  if (countEl) countEl.textContent = t('selectedCount').replace('{n}', count);
 }
 
 async function mergeSelectedFlightLogs() {
@@ -4275,7 +4464,7 @@ function resetMyFlightsMapButton() {
   const btn = document.getElementById('flight-log-map-toggle');
   const label = document.getElementById('flight-log-map-toggle-label');
   btn?.classList.remove('active');
-  if (label) label.textContent = '在地圖上顯示';
+  if (label) label.textContent = t('showOnMap');
 }
 
 function buildMyFlightsLayer(rows) {
@@ -4419,8 +4608,8 @@ function setAddFlightOnewayUI(oneway) {
   document.getElementById('af-oneway-switch').setAttribute('aria-pressed', String(oneway));
   document.getElementById('af-return-row').style.display = oneway ? 'none' : 'flex';
   document.getElementById('af-return-airline-field').style.display = oneway ? 'none' : 'block';
-  document.getElementById('af-dep-flightno-label').textContent = oneway ? '航班號（選填）' : '去程航班號（選填）';
-  document.getElementById('af-dep-date-label').textContent = oneway ? '日期' : '去程日期';
+  document.getElementById('af-dep-flightno-label').textContent = oneway ? t('flightNoOptional') : t('outboundFlightNo');
+  document.getElementById('af-dep-date-label').textContent = oneway ? t('dateOnly') : t('outboundDate');
 }
 
 function toggleAddFlightOneway() {
@@ -4438,8 +4627,8 @@ function swapAddFlightDirection() {
 
 function openAddFlightSheet() {
   editingFlightLogId = null;
-  document.getElementById('af-sheet-title').textContent = '新增飛行紀錄';
-  document.getElementById('af-submit-btn').textContent = '儲存紀錄';
+  document.getElementById('af-sheet-title').textContent = t('addFlightLog');
+  document.getElementById('af-submit-btn').textContent = t('saveRecord');
   document.getElementById('af-dep').disabled = false;
   document.getElementById('af-arr').disabled = false;
   document.getElementById('af-dep').value = '';
@@ -4489,16 +4678,16 @@ function editFlightLog(id) {
   editingFlightLogId = outboundRow.id;
   editingPairedLogId = inboundRow ? inboundRow.id : null;
 
-  document.getElementById('af-sheet-title').textContent = '編輯飛行紀錄';
-  document.getElementById('af-submit-btn').textContent = '更新紀錄';
+  document.getElementById('af-sheet-title').textContent = t('editFlightLog');
+  document.getElementById('af-submit-btn').textContent = t('updateRecord');
   document.getElementById('af-dep').value = outboundRow.dep_iata;
   document.getElementById('af-arr').value = outboundRow.arr_iata;
   document.getElementById('af-dep').disabled = true;
   document.getElementById('af-arr').disabled = true;
   document.getElementById('af-oneway-row').style.display = 'none';
 
-  document.getElementById('af-dep-flightno-label').textContent = inboundRow ? '去程航班號（選填）' : '航班號（選填）';
-  document.getElementById('af-dep-date-label').textContent = inboundRow ? '去程日期' : '日期';
+  document.getElementById('af-dep-flightno-label').textContent = inboundRow ? t('outboundFlightNo') : t('flightNoOptional');
+  document.getElementById('af-dep-date-label').textContent = inboundRow ? t('outboundDate') : t('dateOnly');
   document.getElementById('af-dep-flightno').value = outboundRow.flight_no || '';
   setDateSelectValue('af-dep-date', outboundRow.flight_date || '');
   document.getElementById('af-dep-airline').value = outboundRow.airline_id || '';
@@ -4525,23 +4714,23 @@ function openEditTripSheet(legs) {
   container.innerHTML = legs.map((leg, i) => `
     <div class="flight-log-field-row">
       <div class="flight-log-field">
-        <label>第${i + 1}段 · ${leg.dep_iata} → ${leg.arr_iata} · 航班號（選填）</label>
+        <label>${t('legN').replace('{n}', i + 1)} · ${leg.dep_iata} → ${leg.arr_iata} · ${t('flightNoOptional')}</label>
         <input class="et-flightno" data-leg-id="${leg.id}" value="${leg.flight_no ? escHtml(leg.flight_no) : ''}" placeholder="MU5098">
       </div>
       <div class="flight-log-field">
-        <label>日期</label>
+        <label>${t('dateOnly')}</label>
         <input type="date" class="et-date" data-leg-id="${leg.id}" value="${leg.flight_date || ''}">
       </div>
     </div>
     <div class="flight-log-field">
-      <label>第${i + 1}段航空公司（選填）</label>
+      <label>${t('legN').replace('{n}', i + 1)}${t('legAirline')}</label>
       <select class="et-airline" data-leg-id="${leg.id}"></select>
     </div>
   `).join('');
   legs.forEach(leg => {
     const sel = container.querySelector(`.et-airline[data-leg-id="${leg.id}"]`);
     if (!sel) return;
-    sel.innerHTML = '<option value="">未指定</option>' +
+    sel.innerHTML = `<option value="">${t('unspecified')}</option>` +
       AIRLINE_IDS.map(aid => `<option value="${aid}">${escHtml(airlineCommercialName(aid))}</option>`).join('');
     sel.value = leg.airline_id || '';
   });
@@ -4605,14 +4794,14 @@ async function submitAddFlightSheet() {
     const airlineId = document.getElementById('af-dep-airline').value;
     const note = document.getElementById('af-note').value.trim();
     const msgEl = document.getElementById('af-msg');
-    if (!date) { msgEl.textContent = '請選擇日期'; msgEl.style.color = '#ef4444'; return; }
+    if (!date) { msgEl.textContent = t('pleaseSelectDate'); msgEl.style.color = '#ef4444'; return; }
 
     let retFlightNo = '', retAirlineId = '', retDate = '';
     if (editingPairedLogId) {
       retFlightNo = document.getElementById('af-arr-flightno').value.trim();
       retAirlineId = document.getElementById('af-arr-airline').value;
       retDate = document.getElementById('af-arr-date').value;
-      if (!retDate) { msgEl.textContent = '請選擇回程日期'; msgEl.style.color = '#ef4444'; return; }
+      if (!retDate) { msgEl.textContent = t('pleaseSelectReturnDate'); msgEl.style.color = '#ef4444'; return; }
       if (date > retDate) { msgEl.textContent = '去程日期不能晚於回程日期'; msgEl.style.color = '#ef4444'; return; }
     }
 
@@ -4645,7 +4834,7 @@ async function submitAddFlightSheet() {
     msgEl.textContent = '請輸入正確的三碼機場代碼'; msgEl.style.color = '#ef4444'; return;
   }
   if (!window.AIRPORT_MASTER?.[dep] || !window.AIRPORT_MASTER?.[arr]) {
-    msgEl.textContent = '機場代碼查無資料'; msgEl.style.color = '#ef4444'; return;
+    msgEl.textContent = t('airportNotFound'); msgEl.style.color = '#ef4444'; return;
   }
 
   const depFlightNo = document.getElementById('af-dep-flightno').value.trim();
@@ -4749,7 +4938,7 @@ function authClose() {
   // 若使用者是因為「未登入」被彈出這個視窗、但取消/關閉時仍未登入，
   // 把觸發用的按鈕文字（例如「請先登入才能記錄」）還原成原本的文字。
   if (pendingLogButton && !currentAuthUser) {
-    pendingLogButton.textContent = pendingLogButton.dataset.defaultText || '✓ 搭乘過，加入飛行紀錄';
+    pendingLogButton.textContent = pendingLogButton.dataset.defaultText || t("logFlightBtn");
     pendingLogButton.disabled = false;
     pendingLogButton.classList.remove('done');
   }
@@ -4803,8 +4992,8 @@ function updateAuthUI(user) {
   if (dot) dot.classList.toggle('logged-in', !!user);
   const galleryStatus = document.getElementById('achievement-gallery-auth-status');
   const galleryAction = document.getElementById('achievement-gallery-auth-action');
-  if (galleryStatus) galleryStatus.textContent = user ? (user.email || '已登入') : '尚未登入，成就僅存於本機';
-  if (galleryAction) galleryAction.textContent = user ? '登出' : '登入';
+  if (galleryStatus) galleryStatus.textContent = user ? (user.email || t('loggedInShort')) : t('notLoggedIn');
+  if (galleryAction) galleryAction.textContent = user ? t('logoutBtn') : t('loginBtn');
 }
 function handleAchievementButtonClick() {
   openAchievementGallery();
@@ -4830,7 +5019,7 @@ supabaseClient.auth.getSession().then(({ data }) => {
 const FEEDBACK_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyyLemZKexsiJmzsBWDUzTuOXwKUzWZV3FLjozjWh58w47iEqD0T7Cl63pXFn-ipCokFQ/exec';
 function fbOpen(){ document.getElementById('fb-overlay').classList.add('show'); document.getElementById('fb-msg').textContent=''; }
 function fbClose(){ document.getElementById('fb-overlay').classList.remove('show'); }
-const FB_STAR_LABELS = ['','非常差','差','普通','好','非常好'];
+const FB_STAR_LABELS = LANG === 'en' ? ['','Very Poor','Poor','Average','Good','Excellent'] : ['','非常差','差','普通','好','非常好'];
 let fbRating = 0;
 function fbHighlight(val){ document.querySelectorAll('.fb-star').forEach(s => s.classList.toggle('active', +s.dataset.val <= val)); }
 // fb-star listeners moved inside DOMContentLoaded (see below) to ensure DOM is ready
@@ -4841,17 +5030,17 @@ async function fbSubmit(){
   const contact=document.getElementById('fb-contact').value.trim();
   const msgEl=document.getElementById('fb-msg');
   if(!desc){ msgEl.textContent='請輸入內容'; msgEl.style.color='#ef4444'; return; }
-  msgEl.textContent='送出中...'; msgEl.style.color='#8496a9';
+  msgEl.textContent=t('submitting'); msgEl.style.color='#8496a9';
   try{
     const res = await fetch(FEEDBACK_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify({type,description:desc,contact,rating:fbRating||null,page:location.href})});
     if(!res.ok) throw new Error('status '+res.status);
-    msgEl.textContent='已送出，謝謝回報！'; msgEl.style.color='#2ca88e';
+    msgEl.textContent=t('submitSuccess'); msgEl.style.color='#2ca88e';
     document.getElementById('fb-desc').value=''; document.getElementById('fb-contact').value='';
     fbRating=0; fbHighlight(0); document.getElementById('fb-star-hint').textContent='';
     setTimeout(fbClose,1200);
   }catch(err){
-    msgEl.textContent='送出失敗，請稍後再試'; msgEl.style.color='#ef4444';
+    msgEl.textContent=t('submitFail'); msgEl.style.color='#ef4444';
   }
 }
 </script>

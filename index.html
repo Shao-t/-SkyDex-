@@ -1326,48 +1326,69 @@
     .flight-log-section-label { margin: var(--sd-s5) 0 var(--sd-s1); color: var(--sd-text); font-size: 17px; font-weight: 600; }
     .flight-log-empty { text-align: center; color: var(--sd-text-3); font-size: 14px; line-height: 1.5; padding: var(--sd-s6) var(--sd-s3); }
     .flight-log-list { display: flex; flex-direction: column; }
-    .timeline-group { display: flex; align-items: flex-start; gap: var(--sd-s2); border-top: 1px solid var(--sd-divider); }
-    .timeline-group:first-child { border-top: 0; }
-    .timeline-rail { width: 44px; flex: 0 0 auto; padding-top: var(--sd-s3); }
-    .timeline-md { color: var(--sd-text-2); font-size: 17px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
-    .timeline-md.latest { color: var(--sd-text); }
-    .timeline-weekday { margin-top: 2px; color: var(--sd-text-3); font-size: 12px; }
-    .timeline-cards { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .flight-log-more-btn {
       width: 100%; margin-top: var(--sd-s1); padding: var(--sd-s2); border: 0; border-top: 1px solid var(--sd-divider);
       background: none; color: var(--sd-text-2); font-size: 14px; font-weight: 600; cursor: pointer;
     }
 
-    .ticket-card { position: relative; padding: var(--sd-s3) 44px var(--sd-s3) 0; }
-    .ticket-card + .ticket-card { border-top: 1px solid var(--sd-divider); }
-    .ticket-badge, .ticket-daterange { display: inline; color: var(--sd-text-2); font-size: 12px; font-weight: 500; }
-    .ticket-daterange::before { content: "· "; }
-    .ticket-badge-cross-year { margin-left: 6px; color: var(--sd-text-3); font-size: 12px; font-weight: 500; }
-    .ticket-route { display: flex; align-items: flex-start; gap: var(--sd-s2); margin: var(--sd-s1) 0 var(--sd-s2); }
-    .ticket-endpoint { min-width: 0; }
-    .ticket-iata { color: var(--sd-text); font-size: 22px; font-weight: 600; line-height: 1.15; letter-spacing: .01em; }
-    .ticket-city { margin-top: 2px; color: var(--sd-text-2); font-size: 14px; }
-    .ticket-line {
-      flex: 1; min-width: 20px; height: 1px; margin-top: 13px; background: var(--sd-divider);
-      display: flex; align-items: center; justify-content: center;
+    /* ── Journey card (trip list) ─────────────────────────────── */
+    .journey-section-label { margin: var(--sd-s4) 0 var(--sd-s2); color: var(--sd-text-2); font-size: 14px; font-weight: 600; }
+    .journey-section-label:first-child { margin-top: 0; }
+    .trip-entry { margin-bottom: var(--sd-s2); }
+    .trip-row { position: relative; }
+    .journey-card {
+      position: relative; display: flex; flex-direction: column; min-height: 168px; overflow: hidden;
+      padding: var(--sd-s4); border-radius: var(--sd-r-lg);
+      background: var(--sd-surface); border: 1px solid var(--sd-divider);
+      cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+      transition: transform 150ms var(--sd-ease), filter 150ms ease, border-color 150ms ease;
     }
-    .ticket-plane { padding: 0 var(--sd-s1); background: var(--sd-bg); color: var(--sd-text-3); font-size: 14px; line-height: 1; }
+    .journey-card:active { transform: scale(.98); }
+    @media (hover: hover) { .journey-card:hover { filter: brightness(1.08); } }
+    .journey-card__visual {
+      position: absolute; top: 0; right: 0; bottom: 0; width: min(60%, 300px); pointer-events: none;
+      background-repeat: no-repeat; background-position: right bottom; background-size: cover;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 70%);
+      mask-image: linear-gradient(to right, transparent 0%, #000 70%);
+    }
+    .journey-card__visual--photo { opacity: .35; }
+    .journey-card__body {
+      position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column;
+      justify-content: space-between; gap: var(--sd-s4);
+    }
+    .journey-card__route {
+      display: grid; grid-template-columns: auto auto auto; justify-content: start; align-items: center;
+      column-gap: var(--sd-s3); row-gap: 2px;
+    }
+    .jc-code { color: var(--sd-text); font-size: 30px; font-weight: 700; line-height: 1.15; letter-spacing: .01em; }
+    .jc-arrow { color: var(--sd-text-3); font-size: 20px; line-height: 1; }
+    .jc-city { color: var(--sd-text-2); font-size: 15px; font-weight: 400; line-height: 1.5; }
+    .journey-card__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sd-s2); }
+    .jc-date { color: var(--sd-text-2); font-size: 14px; font-weight: 400; line-height: 1.5; font-variant-numeric: tabular-nums; }
+    .jc-plane { flex: 0 0 auto; color: var(--sd-text-3); display: block; }
+    #flight-log-list.select-mode .trip-row { padding-left: 36px; }
+    .trip-entry.selected .journey-card { border-color: var(--sd-text-3); }
+
+    .trip-details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--sd-base) var(--sd-ease); }
+    .trip-entry.open .trip-details { grid-template-rows: 1fr; }
+    .trip-details-clip { overflow: hidden; min-height: 0; }
+    .trip-details-body { padding: var(--sd-s3) var(--sd-s1) var(--sd-s1); }
+    .trip-meta { margin-bottom: var(--sd-s1); color: var(--sd-text-3); font-size: 12px; font-weight: 500; }
     .ticket-leg-row { display: flex; align-items: baseline; gap: var(--sd-s1); padding: 2px 0; color: var(--sd-text-2); font-size: 14px; }
     .ticket-leg-label { flex: 0 0 32px; color: var(--sd-text-3); }
-    .ticket-leg-date { flex: 0 0 auto; color: var(--sd-text-2); }
+    .ticket-leg-date { flex: 0 0 auto; color: var(--sd-text-2); font-variant-numeric: tabular-nums; }
     .ticket-leg-route { flex: 1; color: var(--sd-text); font-weight: 500; }
     .ticket-leg-km { color: var(--sd-text-2); font-size: 14px; }
     .ticket-leg-airline { margin: 0 0 4px 40px; color: var(--sd-text-3); font-size: 12px; }
     .ticket-note { margin-top: var(--sd-s1); color: var(--sd-text-2); font-size: 14px; line-height: 1.4; }
-    .ticket-edit-btn {
-      position: absolute; top: 6px; right: 0; width: 44px; height: 44px; border: 0; border-radius: var(--sd-r-sm);
-      background: none; color: var(--sd-text-3); cursor: pointer;
-      display: grid; place-items: center;
+    .trip-edit-btn {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: var(--sd-s1); padding: 0;
+      border: 0; background: none; color: var(--sd-text-2); font-size: 14px; font-weight: 600; cursor: pointer;
       transition: color var(--sd-fast) ease;
     }
-    .ticket-edit-btn:hover { color: var(--sd-text); }
+    .trip-edit-btn:hover { color: var(--sd-text); }
     .ticket-checkbox {
-      position: absolute; top: 18px; left: 0; width: 22px; height: 22px; border-radius: 50%;
+      position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%;
       border: 1.5px solid var(--sd-text-3); background: transparent; display: none; z-index: 6; cursor: pointer;
       transition: background var(--sd-fast) ease, border-color var(--sd-fast) ease;
     }
@@ -1377,10 +1398,11 @@
       border: solid var(--sd-accent-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); opacity: 0;
     }
     #flight-log-list.select-mode .ticket-checkbox { display: block; }
-    #flight-log-list.select-mode .ticket-edit-btn { display: none; }
-    #flight-log-list.select-mode .ticket-card { padding-left: 36px; padding-right: 0; }
-    .ticket-card.selected .ticket-checkbox { background: var(--sd-accent); border-color: var(--sd-accent); }
-    .ticket-card.selected .ticket-checkbox::after { opacity: 1; }
+    .trip-entry.selected .ticket-checkbox { background: var(--sd-accent); border-color: var(--sd-accent); }
+    .trip-entry.selected .ticket-checkbox::after { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) {
+      .journey-card, .trip-details { transition: none; }
+    }
 
     .flight-log-merge-bar {
       display: none; position: absolute; left: var(--sd-pad); right: var(--sd-pad);
@@ -1873,7 +1895,7 @@ const STRINGS = {
     airportFullName: "機場全名", country: "國家", alliance: "所屬聯盟", logFlightBtn: "✓ 搭乘過，加入飛行紀錄",
     achDefaultDesc: "完成指定的航線探索條件。", hiddenNotRevealed: "隱藏條件尚未揭曉",
     unlockedOn: "解鎖於", unlocked: "已解鎖", notUnlocked: "尚未解鎖",
-    achStatusSecret: "隱藏成就", achStatusProgress: "挑戰中", flightLogSubtitle: "記錄每一趟航班，累積里程與航跡地圖",
+    journeyUpcoming: "即將出發", tripDaysN: "{n} 天", achStatusSecret: "隱藏成就", achStatusProgress: "挑戰中", flightLogSubtitle: "記錄每一趟航班，累積里程與航跡地圖",
     badgeSummary: "枚徽章已解鎖 · 點選航點即可累積探索進度",
     legOutbound: "去程", legInbound: "回程", legOneWay: "單程", tripRoundTrip: "往返", tripMultiCity: "多城市",
     legN: "第{n}段", selectCard: "選取這張卡片", editRecord: "編輯紀錄", cancelSelect: "取消選取", select: "選取",
@@ -1917,7 +1939,7 @@ const STRINGS = {
     airportFullName: "Airport Name", country: "Country", alliance: "Alliance", logFlightBtn: "✓ Flown — Log It",
     achDefaultDesc: "Meet the specified route exploration criteria.", hiddenNotRevealed: "Hidden — not yet revealed",
     unlockedOn: "Unlocked on", unlocked: "Unlocked", notUnlocked: "Not yet unlocked",
-    achStatusSecret: "Secret", achStatusProgress: "In progress", flightLogSubtitle: "Log every flight and build your mileage and flight map",
+    journeyUpcoming: "Upcoming", tripDaysN: "{n} days", achStatusSecret: "Secret", achStatusProgress: "In progress", flightLogSubtitle: "Log every flight and build your mileage and flight map",
     badgeSummary: "badges unlocked · Click airports to build progress",
     legOutbound: "Outbound", legInbound: "Return", legOneWay: "One-way", tripRoundTrip: "Round Trip", tripMultiCity: "Multi-city",
     legN: "Leg {n}", selectCard: "Select this card", editRecord: "Edit Record", cancelSelect: "Cancel Selection", select: "Select",
@@ -4292,7 +4314,7 @@ function renderFlightLogPanel() {
 
   const visibleGroups = groups.slice(0, flightLogVisibleGroups);
   listEl.classList.toggle('select-mode', flightLogSelectMode);
-  listEl.innerHTML = visibleGroups.map((g, i) => renderTimelineGroup(g, i === 0)).join('');
+  renderJourneyList(listEl, visibleGroups.flatMap(g => g.trips));
   if (moreBtn) moreBtn.style.display = groups.length > visibleGroups.length ? 'block' : 'none';
 }
 
@@ -4303,22 +4325,87 @@ function loadMoreFlightLogGroups() {
   renderFlightLogPanel();
 }
 
-function renderTimelineGroup(g, isLatest) {
-  const d = new Date(g.date + 'T00:00:00');
-  const md = `${d.getMonth() + 1}/${d.getDate()}`;
-  const weekday = (LANG === "en" ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['週日', '週一', '週二', '週三', '週四', '週五', '週六'])[d.getDay()];
-  const cardsHtml = g.trips.map(t => renderTicketCard(t.legs, t.crossYear)).join('');
-  return `
-    <div class="timeline-group">
-      <div class="timeline-rail">
-        <div class="timeline-date">
-          <div class="timeline-md${isLatest ? ' latest' : ''}">${md}</div>
-          <div class="timeline-weekday">${weekday}</div>
-        </div>
+// ── Journey card ─────────────────────────────────────────────────────────
+// One component for both variants ("recent" | "upcoming"); the variant only changes the visual.
+const JOURNEY_RIDGES = [
+  ['M0 118L28 92L46 104L78 66L104 96L128 78L158 108L200 84V160H0Z', 'M0 138L34 118L62 132L96 108L132 130L166 114L200 128V160H0Z'],
+  ['M0 122C30 100 56 104 84 118S140 132 170 108S200 100 200 100V160H0Z', 'M0 140C40 126 70 146 110 136S170 122 200 134V160H0Z'],
+  ['M0 126L40 100L70 118L112 58L140 96L162 84L200 120V160H0Z', 'M0 144L44 126L90 142L140 122L200 140V160H0Z']
+];
+function journeyVisualURI(destination, variant) {
+  const ink = '156,163,175';
+  let body;
+  if (variant === 'upcoming') {
+    body = `<path d="M-10 132C50 40 130 26 210 62" fill="none" stroke="rgba(${ink},.32)" stroke-width="1.2" stroke-dasharray="3 6" stroke-linecap="round"/>`;
+  } else {
+    const seed = [...String(destination || '')].reduce((a, c) => a + c.charCodeAt(0), 0) % JOURNEY_RIDGES.length;
+    const [back, front] = JOURNEY_RIDGES[seed];
+    body = `<path d="${back}" fill="rgba(${ink},.09)"/><path d="${front}" fill="rgba(${ink},.15)"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" preserveAspectRatio="xMaxYMax slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgb(${ink})" stop-opacity=".08"/><stop offset=".75" stop-color="rgb(${ink})" stop-opacity="0"/></linearGradient></defs><rect width="200" height="160" fill="url(#g)"/>${body}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+/**
+ * createJourneyCard({ origin, destination, originCity, destinationCity, date, variant, image, onClick })
+ * origin / destination : IATA codes            originCity / destinationCity : city names
+ * date                 : preformatted string   variant : "recent" (default) | "upcoming"
+ * image                : optional URL (rendered faintly on the right); falls back to a quiet landscape / flight-path
+ * onClick              : () => void            the whole card is the tap target
+ */
+function createJourneyCard({ origin, destination, originCity, destinationCity, date, variant = 'recent', image, onClick }) {
+  const el = document.createElement('div');
+  el.className = `journey-card journey-card--${variant}`;
+  el.setAttribute('role', 'button');
+  el.tabIndex = 0;
+  el.setAttribute('aria-label', `${origin} → ${destination}, ${originCity} → ${destinationCity}, ${date}`);
+  el.innerHTML = `
+    <div class="journey-card__visual${image ? ' journey-card__visual--photo' : ''}" aria-hidden="true"></div>
+    <div class="journey-card__body">
+      <div class="journey-card__route">
+        <span class="jc-code">${escHtml(origin)}</span><span class="jc-arrow" aria-hidden="true">→</span><span class="jc-code">${escHtml(destination)}</span>
+        <span class="jc-city">${escHtml(originCity)}</span><span></span><span class="jc-city">${escHtml(destinationCity)}</span>
       </div>
-      <div class="timeline-cards">${cardsHtml}</div>
-    </div>
-  `;
+      <div class="journey-card__foot">
+        <span class="jc-date">${escHtml(date)}</span>
+        <svg class="jc-plane" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12c0 .8-.6 1.3-1.4 1.3H15.6l-3.7 7.2H9.6l1.9-7.2H6.2L4.4 15.6H2.6L3.8 12 2.6 8.4h1.8l1.8 2.3h5.3L9.6 3.5h2.3l3.7 7.2h5c.8 0 1.4.5 1.4 1.3z"/></svg>
+      </div>
+    </div>`;
+  const visual = el.querySelector('.journey-card__visual');
+  visual.style.backgroundImage = image ? `url("${String(image).replace(/"/g, '%22')}")` : journeyVisualURI(destination, variant);
+  if (typeof onClick === 'function') {
+    el.addEventListener('click', onClick);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); }
+    });
+  }
+  return el;
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function renderJourneyList(listEl, trips) {
+  const today = todayISO();
+  const upcoming = trips.filter(tr => tr.anchorDate > today).sort((a, b) => a.anchorDate.localeCompare(b.anchorDate));
+  const past = trips.filter(tr => tr.anchorDate <= today);
+  const nodes = [];
+  let lastLabel = null;
+  [...upcoming, ...past].forEach(trip => {
+    const isUpcoming = trip.anchorDate > today;
+    const label = isUpcoming ? t('journeyUpcoming') : trip.anchorDate.slice(0, 4);
+    if (label !== lastLabel) {
+      const h = document.createElement('div');
+      h.className = 'journey-section-label';
+      h.textContent = label;
+      nodes.push(h);
+      lastLabel = label;
+    }
+    nodes.push(renderTripEntry(trip.legs, trip.crossYear, isUpcoming));
+  });
+  listEl.replaceChildren(...nodes);
 }
 
 function shortDate(dateStr) {
@@ -4329,8 +4416,7 @@ function cityOf(iata) {
   return cityName(iata, window.AIRPORT_MASTER?.[iata]?.city) || iata;
 }
 
-
-function renderTicketCard(legs, crossYear) {
+function renderTripEntry(legs, crossYear, isUpcoming) {
   const isMultiLeg = legs.length > 1;
   const isSimpleRoundTrip = legs.length === 2 && legs[0].dep_iata === legs[1].arr_iata && legs[0].arr_iata === legs[1].dep_iata;
   const first = legs[0];
@@ -4338,9 +4424,7 @@ function renderTicketCard(legs, crossYear) {
   const tripDays = isMultiLeg
     ? Math.max(Math.round((new Date(last.flight_date) - new Date(first.flight_date)) / 86400000) + 1, 1)
     : null;
-  const dateRangeText = isMultiLeg
-    ? `${first.flight_date} — ${shortDate(last.flight_date)}（${tripDays} 天）`
-    : first.flight_date;
+  const dateText = isMultiLeg ? `${shortDate(first.flight_date)} — ${shortDate(last.flight_date)}` : shortDate(first.flight_date);
 
   const legLabels = isSimpleRoundTrip ? [t("legOutbound"), t("legInbound")] : (isMultiLeg ? legs.map((_, i) => t("legN").replace("{n}", i + 1)) : [t("legOneWay")]);
   const legRowsHtml = legs.map((r, i) => {
@@ -4355,42 +4439,54 @@ function renderTicketCard(legs, crossYear) {
         <span class="ticket-leg-km">${r.distance_km ? r.distance_km.toLocaleString() + ' km' : ''}</span>
       </div>
       ${(airlineName || r.flight_no) ? `<div class="ticket-leg-airline">${[airlineName, r.flight_no ? escHtml(r.flight_no) : ''].filter(Boolean).join(' · ')}</div>` : ''}
-    </div>
-  `;
+    </div>`;
   }).join('');
   const noteHtml = legs.some(r => r.note)
     ? `<div class="ticket-note">${legs.map(r => r.note).filter(Boolean).map(escHtml).join(' / ')}</div>`
     : '';
 
   const badgeLabel = isSimpleRoundTrip ? t("tripRoundTrip") : (isMultiLeg ? t("tripMultiCity") : t("legOneWay"));
-  const headerArrIata = first.arr_iata;
+  const metaLine = [badgeLabel, tripDays ? t("tripDaysN").replace("{n}", tripDays) : '', crossYear ? t("crossYearBadge") : ''].filter(Boolean).join(' · ');
   const cardKey = first.id;
   const isSelected = flightLogSelectMode && flightLogSelectedKeys.has(cardKey);
-  const editBtnOnclick = `editFlightLog('${first.id}')`;
 
-  return `
-    <div class="ticket-card${isSelected ? ' selected' : ''}" data-card-key="${cardKey}">
+  const entry = document.createElement('article');
+  entry.className = `trip-entry${isSelected ? ' selected' : ''}`;
+  entry.dataset.cardKey = cardKey;
+  entry.innerHTML = `
+    <div class="trip-row">
       <div class="ticket-checkbox" onclick="toggleCardSelection(event, '${cardKey}')" aria-label="${t("selectCard")}"></div>
-      <div class="ticket-badge">${badgeLabel}${crossYear ? `<span class="ticket-badge-cross-year">${t("crossYearBadge")}</span>` : ''}</div>
-      <div class="ticket-daterange">${dateRangeText}</div>
-      <div class="ticket-route">
-        <div class="ticket-endpoint">
-          <div class="ticket-iata">${first.dep_iata}</div>
-          <div class="ticket-city">${cityOf(first.dep_iata)}</div>
-        </div>
-        <div class="ticket-line"><span class="ticket-plane">✈︎</span></div>
-        <div class="ticket-endpoint">
-          <div class="ticket-iata">${headerArrIata}</div>
-          <div class="ticket-city">${cityOf(headerArrIata)}</div>
-        </div>
-      </div>
-      ${legRowsHtml}
-      ${noteHtml}
-      <button class="ticket-edit-btn" type="button" onclick="${editBtnOnclick}" aria-label="${t('editRecord')}">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5l2 2-7.5 7.5-2.6.6.6-2.6 7.5-7.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      </button>
+      <div class="trip-card-slot"></div>
     </div>
-  `;
+    <div class="trip-details" inert>
+      <div class="trip-details-clip"><div class="trip-details-body">
+        <div class="trip-meta">${metaLine}</div>
+        ${legRowsHtml}
+        ${noteHtml}
+        <button class="trip-edit-btn" type="button" onclick="editFlightLog('${first.id}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11.5 2.5l2 2-7.5 7.5-2.6.6.6-2.6 7.5-7.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          ${t('editRecord')}
+        </button>
+      </div></div>
+    </div>`;
+  const details = entry.querySelector('.trip-details');
+  const card = createJourneyCard({
+    origin: first.dep_iata,
+    destination: first.arr_iata,
+    originCity: cityOf(first.dep_iata),
+    destinationCity: cityOf(first.arr_iata),
+    date: dateText,
+    variant: isUpcoming ? 'upcoming' : 'recent',
+    onClick: (e) => {
+      if (flightLogSelectMode) { toggleCardSelection(e, cardKey); return; }
+      const open = entry.classList.toggle('open');
+      card.setAttribute('aria-expanded', String(open));
+      details.inert = !open;
+    }
+  });
+  if (!flightLogSelectMode) card.setAttribute('aria-expanded', 'false');
+  entry.querySelector('.trip-card-slot').replaceWith(card);
+  return entry;
 }
 
 function toggleFlightLogMoreStats() {
@@ -4420,7 +4516,7 @@ function toggleCardSelection(event, cardKey) {
   if (!flightLogSelectMode) return;
   if (flightLogSelectedKeys.has(cardKey)) flightLogSelectedKeys.delete(cardKey);
   else flightLogSelectedKeys.add(cardKey);
-  document.querySelector(`.ticket-card[data-card-key="${cardKey}"]`)?.classList.toggle('selected', flightLogSelectedKeys.has(cardKey));
+  document.querySelector(`.trip-entry[data-card-key="${cardKey}"]`)?.classList.toggle('selected', flightLogSelectedKeys.has(cardKey));
   updateFlightLogMergeBar();
 }
 

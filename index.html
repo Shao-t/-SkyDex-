@@ -23,1001 +23,12 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
   <style>
-    :root { --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
-    button, input, select, textarea { font-family: inherit; }
-    .leaflet-container { font-family: var(--font-ui); }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-ui);
-      background: #f5f5f7;
-      overflow: hidden;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
-    body {
-      overscroll-behavior: none;
-      -webkit-text-size-adjust: 100%;
-    }
-    #app {
-      position: relative;
-      width: 100vw;
-      width: 100%;
-      height: var(--app-height, 100vh);
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow: hidden;
-    }
-    #map { position: absolute; inset: 0; z-index: 1; }
-
-    .leaflet-tile { filter: saturate(0.45) brightness(1.06); }
-    .hub-label-name { display: none; }
-    .zoomed-in-labels .hub-label-name { display: inline; }
-    .leaflet-control-zoom { display: none !important; }
-
-    .leaflet-control-attribution {
-      background: rgba(255,255,255,.55) !important;
-      font-size: 9px !important; padding: 0 4px !important;
-      color: rgba(0,0,0,.55);
-    }
-    .leaflet-control-attribution a { color: rgba(0,0,0,.55); }
-    .leaflet-tooltip {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      color: #555 !important;
-      font-family: var(--font-ui) !important;
-      font-size: 10px !important;
-      font-weight: 500 !important;
-      padding: 0 !important;
-      white-space: nowrap !important;
-    }
-    .route-popup .leaflet-popup-content-wrapper {
-      background: rgba(255,255,255,0.94);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 16px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.16);
-    }
-    .route-popup .leaflet-popup-content {
-      margin: 14px 16px;
-      color: #1d1d1f;
-      font-family: var(--font-ui);
-    }
-    .route-popup .leaflet-popup-tip {
-      background: rgba(255,255,255,0.94);
-      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
-    }
-    #route-popup-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 36;
-      pointer-events: none;
-    }
-    #route-popup-layer .route-popup-portal {
-      position: absolute;
-      margin: 0;
-      pointer-events: auto;
-    }
-    #route-popup-layer .leaflet-popup-tip-container {
-      position: absolute;
-      left: var(--route-popup-tip-left, 50%);
-      width: 40px;
-      height: 20px;
-      margin-left: -20px;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    #route-popup-layer .leaflet-popup-tip {
-      width: 17px;
-      height: 17px;
-      margin: -10px auto 0;
-      padding: 1px;
-      transform: rotate(45deg);
-    }
-
-    /* Kinetics B + C: marker spring feedback, popup spring entrance and route drawing */
-    .route-popup .leaflet-popup-content-wrapper {
-      transform-origin: 50% 100%;
-      animation: popup-spring-in 420ms cubic-bezier(.18,1.25,.4,1) both;
-    }
-    .route-popup .leaflet-popup-tip-container {
-      animation: popup-tip-in 220ms ease-out both;
-    }
-    .leaflet-overlay-pane svg path.airport-marker-spring {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: airport-marker-spring 480ms cubic-bezier(.22,1,.36,1) both;
-    }
-    .leaflet-overlay-pane svg path.airport-arrival-ring {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: airport-arrival-ring 680ms cubic-bezier(.16,1,.3,1) both;
-      pointer-events: none;
-    }
-    .leaflet-overlay-pane svg path.route-line-drawing {
-      stroke-linecap: round;
-      pointer-events: none;
-    }
-    .leaflet-overlay-pane svg path.airline-marker-enter {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: airline-marker-enter 480ms cubic-bezier(.18,1.28,.38,1) both;
-      animation-delay: var(--marker-delay, 0ms);
-    }
-    .leaflet-overlay-pane svg path.airline-marker-exit {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: airline-marker-exit 170ms cubic-bezier(.4,0,1,1) both;
-      pointer-events: none;
-    }
-    .leaflet-overlay-pane svg path.airport-selected-ring {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: airport-selected-ring-in 420ms cubic-bezier(.18,1.28,.38,1) both;
-      pointer-events: none;
-      stroke-linecap: round;
-    }
-    @keyframes airport-marker-spring {
-      0%   { transform: scale(1); }
-      20%  { transform: scale(.88); }
-      55%  { transform: scale(1.28); }
-      76%  { transform: scale(.96); }
-      100% { transform: scale(1); }
-    }
-    @keyframes popup-spring-in {
-      0%   { opacity: 0; transform: translateY(10px) scale(.90); }
-      62%  { opacity: 1; transform: translateY(-2px) scale(1.025); }
-      82%  { transform: translateY(1px) scale(.992); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes popup-tip-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes airport-arrival-ring {
-      0%   { opacity: .9; transform: scale(.55); }
-      70%  { opacity: .28; }
-      100% { opacity: 0; transform: scale(2.15); }
-    }
-    @keyframes airline-marker-enter {
-      0%   { opacity: 0; transform: scale(.45); }
-      58%  { opacity: 1; transform: scale(1.18); }
-      78%  { transform: scale(.96); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes airline-marker-exit {
-      0%   { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(.68); }
-    }
-    @keyframes airport-selected-ring-in {
-      0%   { opacity: 0; transform: scale(.55); }
-      58%  { opacity: .95; transform: scale(1.15); }
-      80%  { transform: scale(.97); }
-      100% { opacity: .86; transform: scale(1); }
-    }
-    @keyframes picker-option-in {
-      0%   { opacity: 0; transform: translateY(-5px) scale(.96); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .route-popup .leaflet-popup-content-wrapper,
-      .route-popup .leaflet-popup-tip-container,
-      .leaflet-overlay-pane svg path.airport-marker-spring,
-      .leaflet-overlay-pane svg path.airport-arrival-ring,
-      .leaflet-overlay-pane svg path.airline-marker-enter,
-      .leaflet-overlay-pane svg path.airline-marker-exit,
-      .leaflet-overlay-pane svg path.airport-selected-ring,
-      #airline-picker-panel.open .picker-option {
-        animation: none !important;
-      }
-    }
-    .route-popup-shell { min-width: 170px; max-width: 240px; }
-    .route-popup-header {
-      display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;
-    }
-    .route-popup-iata { font-size: 24px; font-weight: 600; letter-spacing: 0.04em; }
-    .route-popup-city { font-size: 13px; color: #86868b; }
-    .route-popup-rows { display: flex; flex-direction: column; gap: 7px; }
-    .route-popup-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-    .route-popup-key { font-size: 11px; color: #86868b; flex-shrink: 0; }
-    .route-popup-val { font-size: 11px; font-weight: 500; color: #1d1d1f; text-align: right; line-height: 1.3; }
-    .route-stop-marker-wrap { background: transparent; border: 0; }
-    .route-stop-marker {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 34px;
-      height: 22px;
-      padding: 0 7px;
-      border: 1px solid rgba(255,255,255,.85);
-      border-radius: 999px;
-      background: rgba(8,15,26,.90);
-      color: #fff;
-      box-shadow: 0 3px 12px rgba(0,0,0,.28);
-      font: 700 10px/1 var(--font-ui);
-      letter-spacing: .08em;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-    .origin-pick-list { display: flex; flex-direction: column; gap: 6px; }
-    .origin-pick-btn {
-      display: flex; justify-content: space-between; align-items: center;
-      width: 100%; padding: 8px 10px; border-radius: 10px; border: none;
-      background: rgba(0,0,0,0.04); font-size: 12px; font-weight: 500;
-      color: #1d1d1f; cursor: pointer; text-align: left;
-    }
-    .origin-pick-btn:hover { background: rgba(0,0,0,0.08); }
-
-    /* Info card */
-    #info-card {
-      position: absolute; left: 24px; bottom: 24px; z-index: 20;
-      width: 240px; max-width: 280px;
-      background: rgba(255,255,255,0.94);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 16px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.16);
-      padding: 14px 16px;
-      opacity: 0;
-      transform: translateY(6px) scale(0.98);
-      transition: opacity 0.18s, transform 0.18s;
-    }
-    .card-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
-    .card-iata { font-size: 24px; font-weight: 600; letter-spacing: 0.04em; }
-    .card-city { font-size: 13px; color: #86868b; }
-    .info-card-close {
-      width: 28px; height: 28px; border: 0; border-radius: 9px;
-      display: grid; place-items: center; flex: 0 0 auto; margin-left: auto;
-      align-self: flex-start;
-      color: #86868b; background: rgba(0,0,0,0.06); cursor: pointer;
-      transition: transform 160ms cubic-bezier(.22,1,.36,1), background 150ms ease;
-    }
-    .info-card-close:hover { color: #1d1d1f; background: rgba(0,0,0,0.12); transform: rotate(3deg) scale(1.04); }
-    .card-rows { display: flex; flex-direction: column; gap: 7px; }
-    .card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-    .card-key { font-size: 11px; color: #86868b; flex-shrink: 0; }
-    .card-val { font-size: 11px; font-weight: 500; color: #1d1d1f; text-align: right; line-height: 1.3; }
-
-    @media (pointer: coarse) {
-      #info-card {
-        left: 12px;
-        right: 12px;
-        bottom: calc(14px + env(safe-area-inset-bottom));
-        width: auto;
-        max-width: none;
-      }
-      /* 手機 header：改為兩行垂直堆疊 */
-      #header {
-        height: auto;
-        min-height: unset;
-        padding: calc(8px + env(safe-area-inset-top)) 10px 6px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        justify-content: flex-start;
-      }
-      #header-left {
-        width: 100%;
-        gap: 0;
-      }
-      #header-right {
-        width: 100%;
-        display: flex;
-        justify-content: flex-end;
-      }
-      /* 手機版：膠囊撐滿整行，選單為浮動下拉（樣式統一在下方 max-width:860px 區塊定義） */
-      #airline-picker { width: 100%; }
-      #airline-chip { width: 100%; padding: 9px 12px; }
-      .airline-chip-label { flex: 1; text-align: left; }
-      .picker-option { font-size: 11.5px; }
-      .stat-value { font-size: 13px; }
-      #stat-name {
-        font-size: 13px !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 180px;
-      }
-      /* search 跟著 header 高度下移 */
-      #search-wrap { top: var(--search-top, 110px); width: calc(100vw - 24px); max-width: 360px; }
-      #zoom-ctrl {
-        right: 12px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-      }
-      .leaflet-tooltip { font-size: 11px !important; }
-    }
-
-    /* Header */
-    #header {
-      position: absolute; top: 0; left: 0; right: 0; z-index: 25;
-      min-height: 68px; display: flex; align-items: center; justify-content: space-between;
-      padding: calc(10px + env(safe-area-inset-top)) 24px 10px;
-      background: rgba(255,255,255,0.66);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-bottom: 0.5px solid rgba(0,0,0,0.1);
-    }
-    #header-left { display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap; }
-    #header-right {
-      display: flex; align-items: center; justify-content: flex-end;
-      margin-left: auto; gap: 10px; flex-wrap: wrap;
-    }
-    #page-links {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      background: rgba(0,0,0,0.04);
-      padding: 4px; border-radius: 12px;
-      width: fit-content;
-    }
-    .page-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 12px; border-radius: 9px; text-decoration: none;
-      color: #1d1d1f; font-size: 11px; font-weight: 600;
-      letter-spacing: 0.04em; user-select: none;
-      background: transparent; transition: background 0.15s, transform 0.15s;
-    }
-    .page-link:hover { background: rgba(255,255,255,0.8); transform: translateY(-1px); }
-    .page-link.active { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-    .page-link .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    #airline-picker { position: relative; }
-    #airline-chip {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(0,0,0,0.06);
-      border: none; border-radius: 10px;
-      padding: 7px 14px;
-      font-family: inherit; cursor: pointer;
-      -webkit-appearance: none; appearance: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s;
-    }
-    #airline-chip:hover { background: rgba(0,0,0,0.1); }
-    .airline-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .airline-chip-label { font-size: 13px; font-weight: 600; color: #1d1d1f; letter-spacing: 0.04em; white-space: nowrap; }
-    .airline-chip-chevron { color: #86868b; transition: transform 0.2s; flex-shrink: 0; }
-    #airline-chip.open .airline-chip-chevron { transform: rotate(180deg); }
-    #airline-picker-panel {
-      display: grid;
-      position: absolute; top: calc(100% + 6px); left: 0;
-      grid-template-columns: repeat(2, minmax(126px, 1fr));
-      gap: 6px; width: max-content; max-width: 300px;
-      padding: 8px;
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 0.5px solid rgba(0,0,0,0.1);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.16);
-      z-index: 30;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateY(-8px) scale(.96);
-      transform-origin: 24px 0;
-      transition:
-        opacity 150ms ease-out,
-        transform 360ms cubic-bezier(.18,1.25,.4,1),
-        visibility 0s linear 360ms;
-      will-change: opacity, transform;
-    }
-    #airline-picker-panel.open {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: translateY(0) scale(1);
-      transition-delay: 0s;
-    }
-    #airline-picker-panel.open .picker-option {
-      animation: picker-option-in 280ms cubic-bezier(.22,1,.36,1) both;
-      animation-delay: calc(var(--option-index, 0) * 24ms + 35ms);
-    }
-    .picker-option {
-      display: flex; align-items: center; gap: 7px;
-      padding: 8px 9px; border-radius: 8px;
-      border: 0.5px solid transparent;
-      background: transparent;
-      font-family: inherit; font-size: 12px; color: #1d1d1f;
-      cursor: pointer; text-align: left;
-      -webkit-appearance: none; appearance: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.1s;
-    }
-    .picker-option:hover { background: rgba(0,0,0,0.04); }
-    .picker-option.active { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.08); font-weight: 600; }
-    .picker-option-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .picker-option-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .picker-option-check { color: #86868b; flex-shrink: 0; }
-
-    .stat-value { font-size: 16px; font-weight: 500; line-height: 1; }
-
-    /* Search */
-    #search-wrap {
-      position: absolute; top: var(--search-top, 80px); left: 50%; transform: translateX(-50%);
-      z-index: 20; width: 280px;
-    }
-    #search-inner { position: relative; }
-    #search-icon {
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      pointer-events: none;
-    }
-    #search-input {
-      width: 100%; height: 36px;
-      background: rgba(255,255,255,0.72);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 0.5px solid rgba(0,0,0,0.15);
-      border-radius: 10px; padding: 0 14px 0 36px;
-      font-family: inherit; font-size: 13px; color: #1d1d1f; outline: none;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      transition: border-color 0.2s;
-    }
-    #search-results {
-      display: none;
-      margin-top: 6px; background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 0.5px solid rgba(0,0,0,0.12); border-radius: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.12); overflow: hidden;
-    }
-    .result-item {
-      display: flex; align-items: center; gap: 10px; padding: 9px 14px;
-      cursor: pointer; transition: background 0.1s;
-    }
-    .result-iata { font-size: 12px; font-weight: 600; min-width: 32px; }
-    .result-city { font-size: 13px; color: #1d1d1f; }
-    .result-meta { margin-left: auto; font-size: 11px; color: #86868b; }
-
-    /* Zoom */
-    #zoom-ctrl {
-      position: absolute; bottom: calc(32px + env(safe-area-inset-bottom)); right: 24px; z-index: 20;
-      display: flex; flex-direction: column;
-      border-radius: 10px; overflow: hidden;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      transition: bottom 0.3s;
-    }
-    .zoom-btn {
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,0.88);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 20px; color: #1d1d1f;
-      user-select: none; transition: background 0.15s; line-height: 1;
-    }
-    .zoom-btn:hover { background: rgba(0,0,0,0.05); }
-    .zoom-btn.zoom-out { border-top: 0.5px solid rgba(0,0,0,0.1); }
-    /* Feedback widget */
-    .fb-fab {
-      position: static;
-      width: auto; min-width: 0;
-      height: 34px;
-      padding: 0 12px;
-      border-radius: 10px;
-      background: rgba(29,29,31,0.92);
-      color: #fff;
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 0.5px solid rgba(0,0,0,0.12);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      cursor: pointer; z-index: 30;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: background 0.15s, transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-      font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .fb-fab:hover {
-      background: rgba(29,29,31,0.96);
-      box-shadow: 0 4px 18px rgba(0,0,0,0.14);
-      transform: translateY(-1px);
-    }
-    .fb-fab svg { display: block; flex-shrink: 0; }
-    .fb-fab-label { display: inline-block; }
-    @media (pointer: coarse) {
-      .fb-fab {
-        height: 32px;
-        padding: 0 10px;
-        font-size: 11px;
-      }
-      .fb-fab-label {
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-    .fb-overlay {
-      position: fixed; inset: 0;
-      background: rgba(29,29,31,0.35);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      display: none; align-items: center; justify-content: center; z-index: 40;
-    }
-    .fb-overlay.show { display: flex; }
-    #auth-overlay { z-index: 2300; }
-    .fb-box {
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 0.5px solid rgba(0,0,0,0.1);
-      border-radius: 20px;
-      padding: 24px 24px 20px;
-      width: min(400px, 90vw);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.16);
-    }
-    .fb-box h3 {
-      margin: 0 0 16px;
-      font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
-      color: #1d1d1f;
-    }
-    .fb-box select, .fb-box textarea, .fb-box input {
-      width: 100%;
-      background: rgba(0,0,0,0.04);
-      border: 0.5px solid rgba(0,0,0,0.1);
-      border-radius: 10px;
-      padding: 9px 12px;
-      margin-bottom: 8px;
-      font-family: var(--font-ui);
-      font-size: 13px; color: #1d1d1f;
-      outline: none;
-      transition: border-color 0.15s, background 0.15s;
-      appearance: none; -webkit-appearance: none;
-    }
-    .fb-box select:focus, .fb-box textarea:focus, .fb-box input:focus {
-      background: rgba(255,255,255,0.9);
-      border-color: rgba(0,0,0,0.22);
-    }
-    .fb-box textarea { resize: none; height: 88px; line-height: 1.5; }
-    .fb-box input::placeholder, .fb-box textarea::placeholder { color: #bbb; }
-    .fb-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
-    .fb-actions button {
-      padding: 8px 16px;
-      border-radius: 9px; border: none; cursor: pointer;
-      font-family: var(--font-ui);
-      font-size: 13px; font-weight: 500;
-      transition: opacity 0.15s, transform 0.15s;
-    }
-    .fb-actions button:active { transform: scale(0.97); }
-    .fb-cancel-btn {
-      background: rgba(0,0,0,0.06); color: #1d1d1f;
-    }
-    .fb-cancel-btn:hover { background: rgba(0,0,0,0.1); }
-    #fb-send {
-      background: #1d1d1f; color: #fff;
-    }
-    #fb-send:hover { opacity: 0.8; }
-    .fb-star-row { display: flex; gap: 4px; margin-bottom: 8px; }
-    .fb-star { font-size: 18px; cursor: pointer; color: #d1dce8; transition: color 0.1s; }
-    .fb-star.active, .fb-star:hover { color: #f0b429; }
-    .fb-star-hint {
-      min-height: 14px; font-size: 11px; color: #86868b;
-      margin-bottom: 8px; letter-spacing: 0.02em;
-    }
-    .fb-msg { min-height: 16px; font-size: 12px; margin-top: 8px; letter-spacing: 0.01em; }
-
-
-    /* ── Template C: Transparent Flight Deck ───────────────────────────── */
-    :root {
-      --deck-ink: #f6f8fb;
-      --deck-muted: rgba(230,237,246,.66);
-      --deck-panel: rgba(10,18,30,.72);
-      --deck-panel-strong: rgba(8,15,26,.88);
-      --deck-border: rgba(255,255,255,.14);
-      --deck-highlight: rgba(255,255,255,.08);
-      --deck-shadow: 0 18px 50px rgba(3,8,18,.30);
-      --deck-radius: 18px;
-    }
-    body { background: #101722; }
-    #map { background: #101722; }
-    .leaflet-tile {
-      filter: saturate(.58) brightness(.78) contrast(1.08) hue-rotate(4deg);
-    }
-    #map-shade {
-      position: absolute; inset: 0; z-index: 2; pointer-events: none;
-      background:
-        radial-gradient(circle at 50% 44%, transparent 34%, rgba(4,10,18,.08) 68%, rgba(3,8,15,.28) 100%),
-        linear-gradient(180deg, rgba(4,10,18,.22), transparent 26%, transparent 70%, rgba(4,10,18,.18));
-    }
-    #map-shade::after {
-      content: ""; position: absolute; inset: 0; opacity: .16;
-      background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 48%);
-      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 48%);
-    }
-
-    /* Floating cockpit controls — no full-width toolbar */
-    #header {
-      top: calc(16px + env(safe-area-inset-top)); left: 16px; right: 16px;
-      min-height: 0; padding: 0; background: transparent;
-      backdrop-filter: none; -webkit-backdrop-filter: none;
-      border: 0; pointer-events: none;
-      align-items: flex-start;
-    }
-    #header-left, #header-right { pointer-events: auto; }
-    #header-left {
-      gap: 10px; align-items: stretch;
-      padding: 8px;
-      border: 1px solid var(--deck-border);
-      border-radius: var(--deck-radius);
-      background: linear-gradient(145deg, rgba(15,25,42,.82), rgba(7,14,25,.66));
-      backdrop-filter: blur(24px) saturate(145%);
-      -webkit-backdrop-filter: blur(24px) saturate(145%);
-      box-shadow: var(--deck-shadow), inset 0 1px 0 rgba(255,255,255,.06);
-    }
-    #cockpit-brand {
-      min-width: 176px; padding: 5px 10px 5px 8px;
-      display: flex; flex-direction: column; justify-content: center;
-      border-right: 1px solid rgba(255,255,255,.10);
-    }
-    .cockpit-brand-kicker {
-      color: var(--deck-muted); font-size: 9px; font-weight: 700;
-      letter-spacing: .18em; text-transform: uppercase; line-height: 1.1;
-    }
-    .cockpit-brand-title {
-      color: var(--deck-ink); margin-top: 4px; font-size: 14px;
-      font-weight: 650; letter-spacing: .015em; white-space: nowrap;
-    }
-    #airline-chip {
-      min-height: 42px; border-radius: 12px; color: var(--deck-ink);
-      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.08);
-      transition: background 160ms ease, border-color 160ms ease, transform 160ms cubic-bezier(.22,1,.36,1);
-    }
-    #airline-chip:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.14); transform: translateY(-1px); }
-    .airline-chip-label { color: var(--deck-ink); }
-    .airline-chip-chevron { color: var(--deck-muted); }
-    #airline-picker-panel {
-      top: calc(100% + 12px); left: -8px;
-      background: var(--deck-panel-strong); color: var(--deck-ink);
-      border: 1px solid var(--deck-border); border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(2,7,16,.42), inset 0 1px 0 rgba(255,255,255,.05);
-      backdrop-filter: blur(26px) saturate(150%);
-      -webkit-backdrop-filter: blur(26px) saturate(150%);
-    }
-    .picker-option { color: var(--deck-ink); }
-    .picker-option:hover { background: rgba(255,255,255,.08); }
-    .picker-option.active { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.10); }
-    .picker-option-check { color: var(--deck-muted); }
-
-    .stat-value { font-size: 15px; font-weight: 700; }
-
-    #header-right { align-items: flex-start; }
-    .fb-fab {
-      height: 38px; padding: 0 13px; border-radius: 13px;
-      border: 1px solid rgba(255,255,255,.16) !important;
-      box-shadow: 0 14px 36px rgba(3,8,18,.28), inset 0 1px 0 rgba(255,255,255,.10);
-    }
-
-    /* Search becomes the central avionics command bar */
-    #search-wrap {
-      top: calc(82px + env(safe-area-inset-top)) !important;
-      width: min(390px, calc(100vw - 32px)); z-index: 21;
-    }
-    #search-input {
-      height: 44px; padding-left: 42px; color: var(--deck-ink);
-      background: rgba(8,16,28,.76);
-      border: 1px solid rgba(255,255,255,.15) !important;
-      border-radius: 14px;
-      box-shadow: 0 14px 38px rgba(3,8,18,.24), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter: blur(24px) saturate(145%);
-      -webkit-backdrop-filter: blur(24px) saturate(145%);
-      transition: transform 240ms cubic-bezier(.22,1,.36,1), background 180ms ease, border-color 180ms ease;
-    }
-    #search-input::placeholder { color: rgba(230,237,246,.52); }
-    #search-input:focus { transform: translateY(-1px) scale(1.012); background: rgba(8,16,28,.90); }
-    #search-icon circle, #search-icon path { stroke: rgba(230,237,246,.72); }
-    #search-results {
-      margin-top: 8px; color: var(--deck-ink);
-      background: rgba(8,15,26,.92); border: 1px solid var(--deck-border);
-      border-radius: 14px; box-shadow: 0 18px 48px rgba(2,7,16,.38);
-    }
-    .result-city { color: var(--deck-ink); }
-    .result-meta { color: var(--deck-muted); }
-
-    /* Route information becomes a bottom flight-deck drawer */
-    #info-card {
-      left: 50%; bottom: calc(20px + env(safe-area-inset-bottom));
-      width: min(560px, calc(100vw - 120px)); max-width: 560px;
-      transform: translate(-50%, 24px) scale(.98);
-      padding: 14px 18px 16px;
-      color: var(--deck-ink);
-      background: linear-gradient(145deg, rgba(13,23,38,.90), rgba(7,14,25,.78));
-      border: 1px solid var(--deck-border);
-      border-radius: 20px;
-      box-shadow: 0 22px 64px rgba(2,7,16,.42), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter: blur(28px) saturate(150%);
-      -webkit-backdrop-filter: blur(28px) saturate(150%);
-      transition: opacity 220ms ease, transform 460ms cubic-bezier(.18,1.22,.38,1);
-    }
-    #info-card::before {
-      content: ""; display: block; width: 38px; height: 3px;
-      margin: -2px auto 10px; border-radius: 99px; background: rgba(255,255,255,.22);
-    }
-    #info-card[style*='opacity: 1'], #info-card[style*='opacity:1'] {
-      transform: translate(-50%, 0) scale(1) !important;
-    }
-    .drawer-kicker {
-      color: var(--deck-muted); font-size: 9px; font-weight: 700;
-      letter-spacing: .16em; text-transform: uppercase; margin-bottom: 6px;
-    }
-    .card-header { margin-bottom: 12px; }
-    .card-iata { color: var(--deck-ink); font-size: 27px; }
-    .card-city { color: var(--deck-muted); }
-    .info-card-close { color: var(--deck-muted); background: rgba(255,255,255,.08); }
-    .info-card-close:hover { color: var(--deck-ink); background: rgba(255,255,255,.14); }
-    .card-rows { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 18px; }
-    .card-row { padding-top: 7px; border-top: 1px solid rgba(255,255,255,.08); }
-    .card-key { color: var(--deck-muted); }
-    .card-val { color: var(--deck-ink); }
-
-    /* Dark glass route popup; existing spring keyframes remain unchanged */
-    .route-popup .leaflet-popup-content-wrapper {
-      background: rgba(8,15,26,.90); border: 1px solid var(--deck-border);
-      box-shadow: 0 18px 54px rgba(2,7,16,.42), inset 0 1px 0 rgba(255,255,255,.05);
-    }
-    .route-popup .leaflet-popup-content { color: var(--deck-ink); }
-    .route-popup .leaflet-popup-tip { background: rgba(8,15,26,.90); }
-    .route-popup-city, .route-popup-key { color: var(--deck-muted); }
-    .route-popup-iata, .route-popup-val { color: var(--deck-ink); }
-    .origin-pick-btn { color: var(--deck-ink); background: rgba(255,255,255,.07); }
-    .origin-pick-btn:hover { background: rgba(255,255,255,.12); }
-
-    #zoom-ctrl {
-      right: 18px; bottom: calc(22px + env(safe-area-inset-bottom));
-      border: 1px solid var(--deck-border); border-radius: 14px;
-      box-shadow: 0 14px 38px rgba(3,8,18,.26);
-    }
-    .zoom-btn { color: var(--deck-ink); background: rgba(8,16,28,.80); }
-    .zoom-btn:hover { background: rgba(255,255,255,.13); }
-    .zoom-btn.zoom-out { border-top-color: rgba(255,255,255,.10); }
-    .leaflet-tooltip { color: rgba(240,244,249,.86) !important; text-shadow: 0 1px 4px rgba(0,0,0,.85); }
-
-    @media (max-width: 860px), (pointer: coarse) {
-      #header {
-        top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px;
-        flex-direction: row; align-items: flex-start; gap: 8px;
-      }
-      #header-left { width: auto; flex: 1; min-width: 0; padding: 6px; }
-      #cockpit-brand { min-width: 0; width: 112px; padding-left: 6px; }
-      .cockpit-brand-kicker { display: none; }
-      .cockpit-brand-title { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
-      #airline-picker { width: auto; flex: 1; min-width: 0; }
-      #airline-chip { width: 100%; min-width: 0; padding: 8px 10px; }
-      .airline-chip-label { overflow: hidden; text-overflow: ellipsis; }
-      #airline-picker-panel {
-        position: fixed; top: 0; left: 12px; right: 12px;
-        width: auto; max-width: none;
-        grid-template-columns: 1fr 1fr; margin-top: 0;
-        box-shadow: 0 20px 56px rgba(2,7,16,.46);
-      }
-      #header-right { width: auto; }
-      .fb-fab { width: 44px; height: 44px; padding: 0; border-radius: 14px; }
-      .fb-fab-label { display: none; }
-      #search-wrap { top: calc(72px + env(safe-area-inset-top)) !important; }
-      #info-card {
-        left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom));
-        width: auto; max-width: none;
-        z-index: 24; /* 手機版航點資訊優先顯示於縮放控制上方 */
-        pointer-events: none; /* 隱藏時不阻擋縮放按鈕 */
-        transform: translateY(24px) scale(.98);
-      }
-      #info-card[style*='opacity: 1'], #info-card[style*='opacity:1'] {
-        transform: translateY(0) scale(1) !important;
-        pointer-events: auto;
-      }
-      .card-rows { grid-template-columns: 1fr; gap: 6px; }
-      #zoom-ctrl {
-        right: 10px; bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 19; /* 航點資訊展開時退到其下層 */
-      }
-    }
-
-
-    /* ── Route Filters v1 ─────────────────────────────────────────────── */
-    #filter-bar {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      margin-top: 8px; pointer-events: auto;
-    }
-    #filter-trigger {
-      height: 34px; padding: 0 12px; border-radius: 11px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      color: var(--deck-ink); background: rgba(8,16,28,.76);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 10px 28px rgba(3,8,18,.20), inset 0 1px 0 rgba(255,255,255,.05);
-      backdrop-filter: blur(20px) saturate(145%);
-      -webkit-backdrop-filter: blur(20px) saturate(145%);
-      font: 650 11px/1 var(--font-ui);
-      letter-spacing: .03em; cursor: pointer; -webkit-tap-highlight-color: transparent;
-      transition: transform 180ms cubic-bezier(.22,1,.36,1), background 160ms ease, border-color 160ms ease;
-    }
-    #filter-trigger:hover { transform: translateY(-1px); background: rgba(16,27,44,.90); border-color: rgba(255,255,255,.22); }
-    #filter-trigger:active { transform: scale(.96); }
-    #filter-trigger.is-active { border-color: var(--filter-accent, rgba(255,255,255,.28)); }
-    #filter-trigger svg { flex: 0 0 auto; }
-    #filter-count-badge {
-      min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px;
-      display: inline-flex; align-items: center; justify-content: center;
-      color: #fff; background: var(--filter-accent, #5b9bd5);
-      font-size: 9px; font-weight: 750;
-    }
-    #filter-backdrop {
-      position: fixed; inset: 0; z-index: 34; display: none;
-      background: rgba(2,7,16,.48); opacity: 0; pointer-events: none;
-      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-      transition: opacity 220ms ease;
-    }
-    #filter-panel {
-      position: fixed; z-index: 35; left: 50%; top: 150px;
-      width: min(410px, calc(100vw - 28px)); max-height: min(620px, calc(100dvh - 180px));
-      display: flex; flex-direction: column; overflow: hidden;
-      color: var(--deck-ink);
-      background: linear-gradient(145deg, rgba(13,23,38,.96), rgba(7,14,25,.92));
-      border: 1px solid var(--deck-border); border-radius: 20px;
-      box-shadow: 0 24px 70px rgba(2,7,16,.52), inset 0 1px 0 rgba(255,255,255,.06);
-      backdrop-filter: blur(30px) saturate(150%);
-      -webkit-backdrop-filter: blur(30px) saturate(150%);
-      opacity: 0; visibility: hidden; pointer-events: none;
-      transform: translate(-50%, -10px) scale(.975);
-      transform-origin: 50% 0;
-      transition: opacity 180ms ease, visibility 0s linear 220ms, transform 380ms cubic-bezier(.18,1.18,.38,1);
-    }
-    #filter-panel.open {
-      opacity: 1; visibility: visible; pointer-events: auto;
-      transform: translate(-50%, 0) scale(1);
-      transition-delay: 0s;
-    }
-    .filter-sheet-handle { display: none; }
-    .filter-panel-header {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 16px 17px 13px; border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .filter-title-wrap { min-width: 0; }
-    .filter-eyebrow {
-      color: var(--deck-muted); font-size: 8px; font-weight: 750;
-      letter-spacing: .17em; text-transform: uppercase;
-    }
-    .filter-title { margin-top: 4px; font-size: 15px; font-weight: 700; letter-spacing: .01em; display: flex; align-items: baseline; gap: 5px; }
-    .filter-title-dest { font-size: 10px; font-weight: 500; color: #86868b; white-space: nowrap; }
-    .filter-title-dest .stat-value { font-size: 11px; font-weight: 700; margin-right: 1px; }
-    .filter-close {
-      width: 32px; height: 32px; border: 0; border-radius: 10px;
-      display: grid; place-items: center; flex: 0 0 auto;
-      color: var(--deck-muted); background: rgba(255,255,255,.07); cursor: pointer;
-      transition: transform 160ms cubic-bezier(.22,1,.36,1), background 150ms ease;
-    }
-    .filter-close:hover { color: var(--deck-ink); background: rgba(255,255,255,.12); transform: rotate(3deg) scale(1.04); }
-    #filter-groups { overflow: auto; padding: 4px 17px 12px; overscroll-behavior: contain; }
-    .filter-group { padding: 14px 0 13px; border-bottom: 1px solid rgba(255,255,255,.075); }
-    .filter-group:last-child { border-bottom: 0; }
-    .filter-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-    .filter-group-title { font-size: 12px; font-weight: 700; }
-    .filter-group-note { color: var(--deck-muted); font-size: 9px; }
-    .filter-chip-list { display: flex; flex-wrap: wrap; gap: 7px; }
-    .filter-chip {
-      min-height: 31px; padding: 0 10px; border-radius: 999px;
-      display: inline-flex; align-items: center; gap: 6px;
-      color: rgba(238,243,249,.78); background: rgba(255,255,255,.055);
-      border: 1px solid rgba(255,255,255,.08); cursor: pointer;
-      font: 600 10px/1 var(--font-ui);
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 170ms cubic-bezier(.22,1,.36,1), background 150ms ease, border-color 150ms ease, color 150ms ease;
-    }
-    .filter-chip:hover { transform: translateY(-1px); color: var(--deck-ink); background: rgba(255,255,255,.09); }
-    .filter-chip:active { transform: scale(.95); }
-    .filter-chip.active {
-      color: #fff; background: rgba(91,155,213,.24);
-      border-color: var(--filter-accent, #5b9bd5);
-      background: color-mix(in srgb, var(--filter-accent, #5b9bd5) 32%, rgba(255,255,255,.07));
-      border-color: color-mix(in srgb, var(--filter-accent, #5b9bd5) 72%, transparent);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
-    }
-    .filter-chip-count { color: var(--deck-muted); font-size: 8px; }
-    .filter-chip.active .filter-chip-count { color: rgba(255,255,255,.72); }
-    .filter-panel-footer {
-      padding: 12px 17px calc(12px + env(safe-area-inset-bottom));
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      border-top: 1px solid rgba(255,255,255,.08); background: rgba(5,11,20,.54);
-    }
-    .filter-footer-result { color: var(--deck-muted); font-size: 10px; line-height: 1.35; }
-    .filter-footer-result strong { display: block; color: var(--deck-ink); font-size: 13px; }
-    #filter-reset {
-      min-height: 34px; padding: 0 13px; border-radius: 11px;
-      color: var(--deck-ink); background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.10); cursor: pointer;
-      font-size: 10px; font-weight: 700;
-    }
-    #filter-empty {
-      display: none; padding: 10px 12px; margin-top: 10px; border-radius: 11px;
-      color: #ffd7d7; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.18);
-      font-size: 10px; line-height: 1.4;
-    }
-    #filter-empty.show { display: block; }
-
-    @media (max-width: 860px), (pointer: coarse) {
-      #filter-bar { margin-top: 7px; }
-      #filter-trigger { height: 32px; }
-      #filter-trigger { padding: 0 11px; }
-      #filter-backdrop { display: block; }
-      #filter-backdrop.open { opacity: 1; pointer-events: auto; }
-      #filter-panel {
-        left: 0; right: 0; top: auto !important; bottom: 0; width: 100%;
-        max-height: min(78dvh, 680px); border-radius: 24px 24px 0 0;
-        transform: translateY(104%); transform-origin: 50% 100%;
-        opacity: 1; visibility: visible;
-        transition: transform 460ms cubic-bezier(.18,1.08,.36,1), box-shadow 220ms ease;
-      }
-      #filter-panel.open { transform: translateY(0); }
-      .filter-sheet-handle {
-        display: block; width: 42px; height: 4px; margin: 9px auto 0;
-        border-radius: 999px; background: rgba(255,255,255,.22);
-      }
-      .filter-panel-header { padding-top: 10px; }
-      #filter-groups { padding-left: 15px; padding-right: 15px; }
-      .filter-panel-footer { padding-left: 15px; padding-right: 15px; }
-      .filter-chip { min-height: 34px; padding: 0 11px; font-size: 11px; }
-      body.filter-open #map { pointer-events: none; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #filter-panel, #filter-backdrop, #filter-trigger, .filter-chip { transition-duration: 0.01ms !important; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #search-input, #info-card, #airline-chip { transition-duration: 0.01ms !important; }
-    }
-
-  
-    /* Cross-airline destination search */
-    #search-results { max-height: min(58vh, 430px); overflow-y: auto; }
-    .global-result-item {
-      display: grid; grid-template-columns: 42px minmax(0,1fr) auto;
-      align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      transition: background .16s ease, transform .16s ease;
-    }
-    .global-result-item:last-child { border-bottom: 0; }
-    .global-result-item:hover { background: rgba(255,255,255,0.07); }
-    .global-airline-code {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-width: 38px; height: 28px; border-radius: 8px;
-      border: 1px solid color-mix(in srgb, var(--airline-color) 55%, transparent);
-      background: color-mix(in srgb, var(--airline-color) 18%, transparent);
-      color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .06em;
-    }
-    .global-result-main { min-width: 0; }
-    .global-result-route {
-      display: flex; align-items: baseline; gap: 7px; min-width: 0;
-      color: #f7f9fc; font-size: 12px; font-weight: 650;
-    }
-    .global-result-city {
-      color: rgba(230,237,246,.62); font-size: 10px; font-weight: 500;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .global-result-airline {
-      margin-top: 3px; color: rgba(230,237,246,.68); font-size: 10px;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .global-result-status {
-      padding: 4px 7px; border-radius: 999px; white-space: nowrap;
-      font-size: 9px; font-weight: 650; color: rgba(255,255,255,.86);
-      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
-    }
-    .global-search-empty { padding: 18px 14px; text-align: center; color: rgba(230,237,246,.62); font-size: 11px; }
-    @media (pointer: coarse) {
-      #search-results { max-height: 48vh; }
-      .global-result-item { grid-template-columns: 40px minmax(0,1fr); padding: 11px 12px; }
-      .global-result-status { grid-column: 2; justify-self: start; margin-top: -3px; }
-    }
-
     /* ══════════════════════════════════════════════════════════════
-       SkyDex UI v2 — scoped to: achievement toast, achievement gallery,
-       flight log tab, add / edit flight sheets.
-       Tokens are defined only on these containers, so the map page is untouched.
+       SkyDex UI v2 — design tokens (global) + map layer
+       One set of rules per component; no light/dark override layers.
        ══════════════════════════════════════════════════════════════ */
-    #achievement-toast,
-    #achievement-gallery-overlay,
-    .flight-log-sheet-backdrop {
+    :root {
+      --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       --sd-bg: #0B0F14;
       --sd-surface: #151B23;
       --sd-surface-2: #1C232D;
@@ -1034,9 +45,397 @@
       --sd-pad: 20px;
       --sd-ease: cubic-bezier(.22, 1, .36, 1);
       --sd-fast: 140ms; --sd-base: 240ms;
-      font-family: var(--font-ui);
-      -webkit-font-smoothing: antialiased;
+      --sd-float-shadow: 0 8px 24px rgba(0, 0, 0, .35);
     }
+    button, input, select, textarea { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      font-family: var(--font-ui); background: var(--sd-bg); color: var(--sd-text);
+      overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased;
+    }
+    #app { position: relative; width: 100%; height: var(--app-height, 100vh); min-height: 100vh; min-height: 100dvh; overflow: hidden; }
+    #map { position: absolute; inset: 0; z-index: 1; background: var(--sd-bg); }
+
+    /* ── Map / Leaflet ─────────────────────────────────────────── */
+    .leaflet-container { font-family: var(--font-ui); }
+    .leaflet-tile { filter: saturate(.58) brightness(.78) contrast(1.08) hue-rotate(4deg); }
+    .hub-label-name { display: none; }
+    .zoomed-in-labels .hub-label-name { display: inline; }
+    .leaflet-control-zoom { display: none !important; }
+    .leaflet-control-attribution {
+      background: rgba(11, 15, 20, .72) !important; color: var(--sd-text-3) !important;
+      font-size: 10px !important; padding: 0 6px !important;
+    }
+    .leaflet-control-attribution a { color: var(--sd-text-2) !important; }
+    .leaflet-tooltip {
+      background: transparent !important; border: none !important; box-shadow: none !important;
+      color: rgba(240, 244, 249, .86) !important; font-family: var(--font-ui) !important;
+      font-size: 10px !important; font-weight: 500 !important; padding: 0 !important; white-space: nowrap !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+    }
+
+    /* Route popup (Leaflet popup rendered into a portal layer) */
+    #route-popup-layer { position: fixed; inset: 0; z-index: 36; pointer-events: none; }
+    #route-popup-layer .route-popup-portal { position: absolute; margin: 0; pointer-events: auto; }
+    #route-popup-layer .leaflet-popup-tip-container { position: absolute; left: var(--route-popup-tip-left, 50%); width: 40px; height: 20px; margin-left: -20px; overflow: hidden; pointer-events: none; }
+    #route-popup-layer .leaflet-popup-tip { width: 17px; height: 17px; margin: -10px auto 0; padding: 1px; transform: rotate(45deg); }
+    .route-popup .leaflet-popup-content-wrapper {
+      background: var(--sd-surface); color: var(--sd-text);
+      border: 1px solid var(--sd-divider); border-radius: var(--sd-r-md); box-shadow: var(--sd-float-shadow);
+      transform-origin: 50% 100%; animation: popup-spring-in var(--sd-base) var(--sd-ease) both;
+    }
+    .route-popup .leaflet-popup-content { margin: var(--sd-s3); color: var(--sd-text); font-family: var(--font-ui); }
+    .route-popup .leaflet-popup-tip { background: var(--sd-surface); box-shadow: none; }
+    .route-popup .leaflet-popup-tip-container { animation: popup-tip-in 200ms ease-out both; }
+    .route-popup-shell { min-width: 180px; max-width: 260px; }
+    .route-popup-header { display: flex; align-items: baseline; gap: var(--sd-s1); margin-bottom: var(--sd-s2); }
+    .route-popup-iata { color: var(--sd-text); font-size: 24px; font-weight: 700; letter-spacing: .01em; }
+    .route-popup-city { color: var(--sd-text-2); font-size: 14px; }
+    .route-popup-rows { display: flex; flex-direction: column; gap: var(--sd-s1); }
+    .route-popup-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sd-s1); }
+    .route-popup-key { color: var(--sd-text-2); font-size: 13px; line-height: 1.35; flex-shrink: 0; }
+    .route-popup-val { color: var(--sd-text); font-size: 13px; font-weight: 500; text-align: right; line-height: 1.35; }
+    .route-popup-log-btn {
+      width: 100%; min-height: 40px; margin-top: var(--sd-s2); padding: 0 var(--sd-s2); border: 0; border-radius: var(--sd-r-sm);
+      background: var(--sd-surface-2); color: var(--sd-text); font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: filter var(--sd-fast) ease, transform var(--sd-fast) var(--sd-ease);
+    }
+    .route-popup-log-btn:active { transform: scale(.98); }
+    @media (hover: hover) { .route-popup-log-btn:hover { filter: brightness(1.12); } }
+    .route-popup-log-btn.done { color: var(--sd-success); cursor: default; }
+    .route-stop-marker-wrap { background: transparent; border: 0; }
+    .route-stop-marker {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; padding: 0 var(--sd-s1);
+      border: 1px solid var(--sd-divider); border-radius: 8px; background: var(--sd-bg); color: var(--sd-text);
+      font-size: 12px; font-weight: 700; letter-spacing: .04em; transform: translate(-50%, -50%); pointer-events: none;
+    }
+    .origin-pick-list { display: flex; flex-direction: column; gap: 4px; }
+    .origin-pick-btn {
+      display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 40px; padding: 0 var(--sd-s2);
+      border: 0; border-radius: var(--sd-r-sm); background: var(--sd-surface-2); color: var(--sd-text);
+      font-size: 14px; font-weight: 500; text-align: left; cursor: pointer;
+    }
+    @media (hover: hover) { .origin-pick-btn:hover { filter: brightness(1.12); } }
+
+    /* Map feedback animations (unchanged) */
+    .leaflet-overlay-pane svg path.airport-marker-spring { transform-box: fill-box; transform-origin: center; animation: airport-marker-spring 480ms cubic-bezier(.22,1,.36,1) both; }
+    .leaflet-overlay-pane svg path.airport-arrival-ring { transform-box: fill-box; transform-origin: center; animation: airport-arrival-ring 680ms cubic-bezier(.16,1,.3,1) both; pointer-events: none; }
+    .leaflet-overlay-pane svg path.route-line-drawing { stroke-linecap: round; pointer-events: none; }
+    .leaflet-overlay-pane svg path.airline-marker-enter { transform-box: fill-box; transform-origin: center; animation: airline-marker-enter 480ms cubic-bezier(.18,1.28,.38,1) both; animation-delay: var(--marker-delay, 0ms); }
+    .leaflet-overlay-pane svg path.airline-marker-exit { transform-box: fill-box; transform-origin: center; animation: airline-marker-exit 170ms cubic-bezier(.4,0,1,1) both; pointer-events: none; }
+    .leaflet-overlay-pane svg path.airport-selected-ring { transform-box: fill-box; transform-origin: center; animation: airport-selected-ring-in 420ms cubic-bezier(.18,1.28,.38,1) both; pointer-events: none; stroke-linecap: round; }
+    @keyframes airport-marker-spring { 0%   { transform: scale(1); } 20%  { transform: scale(.88); } 55%  { transform: scale(1.28); } 76%  { transform: scale(.96); } 100% { transform: scale(1); } }
+    @keyframes airport-arrival-ring { 0%   { opacity: .9; transform: scale(.55); } 70%  { opacity: .28; } 100% { opacity: 0; transform: scale(2.15); } }
+    @keyframes airline-marker-enter { 0%   { opacity: 0; transform: scale(.45); } 58%  { opacity: 1; transform: scale(1.18); } 78%  { transform: scale(.96); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes airline-marker-exit { 0%   { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.68); } }
+    @keyframes airport-selected-ring-in { 0%   { opacity: 0; transform: scale(.55); } 58%  { opacity: .95; transform: scale(1.15); } 80%  { transform: scale(.97); } 100% { opacity: .86; transform: scale(1); } }
+    @keyframes popup-spring-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes popup-tip-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes picker-option-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    #header {
+      position: absolute; top: calc(16px + env(safe-area-inset-top)); left: 16px; right: 16px; z-index: 25;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sd-s1); pointer-events: none;
+    }
+    #header-left, #header-right { display: flex; align-items: center; gap: var(--sd-s1); pointer-events: auto; }
+    #header-left { padding: var(--sd-s1); background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-md); }
+    #header-right { margin-left: auto; }
+    #cockpit-brand { padding: 0 var(--sd-s2) 0 var(--sd-s1); }
+    .cockpit-brand-kicker { display: none; }
+    .cockpit-brand-title { color: var(--sd-text); font-size: 17px; font-weight: 600; white-space: nowrap; }
+    #airline-picker { position: relative; }
+    #airline-chip {
+      display: flex; align-items: center; gap: var(--sd-s1); min-height: 40px; padding: 0 var(--sd-s2);
+      border: 0; border-radius: var(--sd-r-sm); background: var(--sd-surface-2); color: var(--sd-text);
+      cursor: pointer; -webkit-appearance: none; appearance: none;
+      transition: filter var(--sd-fast) ease, transform var(--sd-fast) var(--sd-ease);
+    }
+    #airline-chip:active { transform: scale(.98); }
+    @media (hover: hover) { #airline-chip:hover { filter: brightness(1.12); } }
+    .airline-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .airline-chip-label { color: var(--sd-text); font-size: 14px; font-weight: 600; white-space: nowrap; }
+    .airline-chip-chevron { color: var(--sd-text-3); flex-shrink: 0; transition: transform var(--sd-base) var(--sd-ease); }
+    #airline-chip.open .airline-chip-chevron { transform: rotate(180deg); }
+    #airline-picker-panel {
+      display: grid; position: absolute; top: calc(100% + 12px); left: -8px; grid-template-columns: repeat(2, minmax(126px, 1fr));
+      gap: 4px; width: max-content; max-width: 300px; padding: var(--sd-s1); z-index: 30;
+      background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-md); box-shadow: var(--sd-float-shadow);
+      opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-6px); transform-origin: 24px 0;
+      transition: opacity 150ms ease-out, transform var(--sd-base) var(--sd-ease), visibility 0s linear var(--sd-base);
+    }
+    #airline-picker-panel.open { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition-delay: 0s; }
+    #airline-picker-panel.open .picker-option { animation: picker-option-in 200ms var(--sd-ease) both; animation-delay: calc(var(--option-index, 0) * 20ms + 20ms); }
+    .picker-option {
+      display: flex; align-items: center; gap: var(--sd-s1); min-height: 40px; padding: 0 var(--sd-s2);
+      border: 0; border-radius: var(--sd-r-sm); background: transparent; color: var(--sd-text);
+      font-size: 14px; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none;
+    }
+    .picker-option:hover { background: var(--sd-surface-2); }
+    .picker-option.active { background: var(--sd-surface-2); font-weight: 600; }
+    .picker-option-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .picker-option-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .picker-option-check { color: var(--sd-text-2); flex-shrink: 0; }
+    .stat-value { font-size: 15px; font-weight: 600; }
+
+    /* Header buttons: language · achievements · feedback (one component) */
+    .lang-toggle-btn, .achievement-gallery-button, .fb-fab {
+      position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--sd-s1);
+      min-width: 40px; min-height: 40px; padding: 0 var(--sd-s2);
+      border: 1px solid var(--sd-divider); border-radius: var(--sd-r-sm); background: var(--sd-surface); color: var(--sd-text);
+      font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; touch-action: manipulation;
+      transition: filter var(--sd-fast) ease, transform var(--sd-fast) var(--sd-ease);
+    }
+    .lang-toggle-btn:active, .achievement-gallery-button:active, .fb-fab:active { transform: scale(.97); }
+    @media (hover: hover) { .lang-toggle-btn:hover, .achievement-gallery-button:hover, .fb-fab:hover { filter: brightness(1.15); } }
+    .achievement-gallery-button svg, .fb-fab svg { flex: 0 0 auto; display: block; }
+    #achievement-gallery-button-count { color: var(--sd-accent); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    #auth-status-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--sd-text-3); }
+    #auth-status-dot.logged-in { background: var(--sd-success); }
+
+    /* ── Search ────────────────────────────────────────────────── */
+    #search-wrap {
+      position: absolute; top: calc(82px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+      z-index: 21; width: min(390px, calc(100vw - 32px));
+    }
+    #search-inner { position: relative; }
+    #search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+    #search-icon circle, #search-icon path { stroke: var(--sd-text-3); }
+    #search-input {
+      width: 100%; height: 44px; padding: 0 14px 0 42px; outline: none;
+      background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-md);
+      color: var(--sd-text); font-size: 16px; transition: border-color var(--sd-fast) ease;
+    }
+    #search-input::placeholder { color: var(--sd-text-3); }
+    #search-input:focus { border-color: var(--sd-text-3); }
+    #search-results {
+      display: none; margin-top: var(--sd-s1); max-height: min(58vh, 430px); overflow-y: auto;
+      background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-md); box-shadow: var(--sd-float-shadow);
+    }
+    .global-result-item {
+      display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: var(--sd-s2);
+      padding: var(--sd-s2); cursor: pointer; border-bottom: 1px solid var(--sd-divider);
+      transition: background var(--sd-fast) ease;
+    }
+    .global-result-item:last-child { border-bottom: 0; }
+    .global-result-item:hover { background: var(--sd-surface-2); }
+    .global-airline-code {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 28px; border-radius: 8px;
+      background: color-mix(in srgb, var(--airline-color) 22%, transparent); color: var(--sd-text);
+      font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    }
+    .global-result-main { min-width: 0; }
+    .global-result-route { display: flex; align-items: baseline; gap: var(--sd-s1); min-width: 0; color: var(--sd-text); font-size: 14px; font-weight: 600; }
+    .global-result-city { color: var(--sd-text-2); font-size: 12px; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .global-result-airline { margin-top: 2px; color: var(--sd-text-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .global-result-status { color: var(--sd-text-3); font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .global-search-empty { padding: var(--sd-s4) var(--sd-s3); text-align: center; color: var(--sd-text-3); font-size: 14px; }
+
+    /* ── Route filters ─────────────────────────────────────────── */
+    #filter-bar { display: flex; align-items: center; justify-content: center; gap: var(--sd-s1); margin-top: var(--sd-s1); pointer-events: auto; }
+    #filter-trigger {
+      display: inline-flex; align-items: center; gap: var(--sd-s1); height: 36px; padding: 0 var(--sd-s2);
+      border: 1px solid var(--sd-divider); border-radius: var(--sd-r-sm); background: var(--sd-surface); color: var(--sd-text);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: filter var(--sd-fast) ease, transform var(--sd-fast) var(--sd-ease), border-color var(--sd-fast) ease;
+    }
+    #filter-trigger:active { transform: scale(.97); }
+    @media (hover: hover) { #filter-trigger:hover { filter: brightness(1.15); } }
+    #filter-trigger.is-active { border-color: var(--filter-accent, var(--sd-text-3)); }
+    #filter-trigger svg { flex: 0 0 auto; }
+    #filter-count-badge {
+      min-width: 18px; height: 18px; padding: 0 6px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+      color: var(--sd-accent-ink); background: var(--sd-accent); font-size: 12px; font-weight: 600;
+    }
+    #filter-count-badge[hidden] { display: none; }
+    #filter-backdrop {
+      position: fixed; inset: 0; z-index: 34; display: none; background: rgba(0, 0, 0, .6);
+      opacity: 0; pointer-events: none; transition: opacity var(--sd-base) ease;
+    }
+    #filter-panel {
+      position: fixed; z-index: 35; left: 50%; top: 150px; width: min(410px, calc(100vw - 28px));
+      max-height: min(620px, calc(100dvh - 180px)); display: flex; flex-direction: column; overflow: hidden;
+      color: var(--sd-text); background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-lg); box-shadow: var(--sd-float-shadow);
+      opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, -8px); transform-origin: 50% 0;
+      transition: opacity 180ms ease, visibility 0s linear var(--sd-base), transform var(--sd-base) var(--sd-ease);
+    }
+    #filter-panel.open { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); transition-delay: 0s; }
+    .filter-sheet-handle { display: none; }
+    .filter-panel-header { display: flex; align-items: center; justify-content: space-between; gap: var(--sd-s2); padding: var(--sd-s4) var(--sd-pad) var(--sd-s2); }
+    .filter-title-wrap { min-width: 0; }
+    .filter-eyebrow { display: none; }
+    .filter-title { display: flex; align-items: baseline; gap: var(--sd-s1); font-size: 17px; font-weight: 600; }
+    .filter-title-dest { color: var(--sd-text-3); font-size: 12px; white-space: nowrap; }
+    .filter-title-dest .stat-value { color: var(--sd-text); font-size: 14px; font-weight: 600; margin-right: 2px; }
+    .filter-close {
+      position: relative; width: 32px; height: 32px; border: 0; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
+      color: var(--sd-text-2); background: var(--sd-surface-2); cursor: pointer; transition: transform var(--sd-fast) var(--sd-ease);
+    }
+    .filter-close::before { content: ""; position: absolute; inset: -6px; }
+    .filter-close:active { transform: scale(.94); }
+    #filter-groups { overflow: auto; padding: 4px var(--sd-pad) var(--sd-s2); overscroll-behavior: contain; }
+    .filter-group { padding: var(--sd-s3) 0; border-bottom: 1px solid var(--sd-divider); }
+    .filter-group:last-child { border-bottom: 0; }
+    .filter-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sd-s2); margin-bottom: var(--sd-s2); }
+    .filter-group-title { font-size: 14px; font-weight: 600; }
+    .filter-group-note { color: var(--sd-text-3); font-size: 12px; }
+    .filter-chip-list { display: flex; flex-wrap: wrap; gap: var(--sd-s1); }
+    .filter-chip {
+      min-height: 36px; padding: 0 var(--sd-s2); border: 0; border-radius: var(--sd-r-sm); display: inline-flex; align-items: center; gap: 6px;
+      color: var(--sd-text-2); background: var(--sd-surface-2); cursor: pointer; font-size: 13px; font-weight: 600;
+      transition: transform var(--sd-fast) var(--sd-ease), color var(--sd-fast) ease, box-shadow var(--sd-fast) ease;
+    }
+    .filter-chip:hover { color: var(--sd-text); }
+    .filter-chip:active { transform: scale(.97); }
+    .filter-chip.active { color: var(--sd-text); box-shadow: inset 0 0 0 1.5px var(--filter-accent, var(--sd-text-3)); }
+    .filter-chip-count { color: var(--sd-text-3); font-size: 12px; }
+    .filter-chip.active .filter-chip-count { color: var(--sd-text-2); }
+    .filter-panel-footer {
+      padding: var(--sd-s2) var(--sd-pad) calc(var(--sd-s2) + env(safe-area-inset-bottom));
+      display: flex; align-items: center; justify-content: space-between; gap: var(--sd-s2); border-top: 1px solid var(--sd-divider);
+    }
+    .filter-footer-result { color: var(--sd-text-2); font-size: 12px; line-height: 1.4; }
+    .filter-footer-result strong { display: block; color: var(--sd-text); font-size: 15px; font-weight: 600; }
+    #filter-reset {
+      min-height: 40px; padding: 0 var(--sd-s3); border: 0; border-radius: var(--sd-r-sm);
+      background: var(--sd-surface-2); color: var(--sd-text); cursor: pointer; font-size: 14px; font-weight: 600;
+    }
+    #filter-empty { display: none; padding: var(--sd-s2); margin-top: var(--sd-s2); border-radius: var(--sd-r-sm); color: var(--sd-danger); background: var(--sd-surface-2); font-size: 14px; line-height: 1.4; }
+    #filter-empty.show { display: block; }
+
+    /* ── Airport info drawer ───────────────────────────────────── */
+    #info-card {
+      position: absolute; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 20;
+      width: min(560px, calc(100vw - 120px)); max-width: 560px; padding: var(--sd-s2) var(--sd-pad) var(--sd-pad);
+      color: var(--sd-text); background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-lg); box-shadow: var(--sd-float-shadow);
+      max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain;
+      opacity: 0; transform: translate(-50%, 16px);
+      transition: opacity 200ms ease, transform var(--sd-base) var(--sd-ease);
+    }
+    #info-card::before { content: ""; display: block; width: 36px; height: 5px; margin: 0 auto var(--sd-s2); border-radius: 3px; background: var(--sd-text-3); opacity: .6; }
+    #info-card[style*='opacity: 1'], #info-card[style*='opacity:1'] { transform: translate(-50%, 0) !important; }
+    .drawer-kicker { display: none; }
+    .card-header { display: flex; align-items: baseline; gap: var(--sd-s1); margin-bottom: var(--sd-s2); }
+    .card-iata { color: var(--sd-text); font-size: 28px; font-weight: 700; letter-spacing: .01em; }
+    .card-city { color: var(--sd-text-2); font-size: 15px; }
+    .info-card-close {
+      position: relative; width: 32px; height: 32px; border: 0; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
+      margin-left: auto; align-self: flex-start; color: var(--sd-text-2); background: var(--sd-surface-2); cursor: pointer;
+      transition: transform var(--sd-fast) var(--sd-ease);
+    }
+    .info-card-close::before { content: ""; position: absolute; inset: -6px; }
+    .info-card-close:active { transform: scale(.94); }
+    .card-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sd-s4); }
+    .card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sd-s1); padding: 10px 0; border-top: 1px solid var(--sd-divider); }
+    .card-key { color: var(--sd-text-2); font-size: 14px; line-height: 1.35; flex-shrink: 0; }
+    .card-val { color: var(--sd-text); font-size: 14px; font-weight: 500; text-align: right; line-height: 1.35; }
+
+    /* ── Zoom ──────────────────────────────────────────────────── */
+    #zoom-ctrl {
+      position: absolute; bottom: calc(22px + env(safe-area-inset-bottom)); right: 18px; z-index: 20;
+      display: flex; flex-direction: column; overflow: hidden;
+      background: var(--sd-surface); border: 1px solid var(--sd-divider); border-radius: var(--sd-r-sm);
+    }
+    .zoom-btn {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      color: var(--sd-text); font-size: 20px; line-height: 1; user-select: none; transition: background var(--sd-fast) ease;
+    }
+    .zoom-btn:hover { background: var(--sd-surface-2); }
+    .zoom-btn.zoom-out { border-top: 1px solid var(--sd-divider); }
+
+    /* ── Feedback & login dialogs ──────────────────────────────── */
+    .fb-overlay {
+      position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center;
+      padding: var(--sd-s3); background: rgba(0, 0, 0, .6);
+    }
+    .fb-overlay.show { display: flex; animation: sd-fade var(--sd-base) ease-out; }
+    #auth-overlay { z-index: 2300; }
+    .fb-box {
+      width: min(400px, 100%); padding: var(--sd-s4); color: var(--sd-text);
+      background: var(--sd-surface); border-radius: var(--sd-r-lg); color-scheme: dark;
+    }
+    .fb-overlay.show .fb-box { animation: sd-rise var(--sd-base) var(--sd-ease); }
+    .fb-box h3 { margin: 0 0 var(--sd-s3); font-size: 17px; font-weight: 600; color: var(--sd-text); }
+    .fb-text { margin-bottom: var(--sd-s2); color: var(--sd-text-2); font-size: 14px; line-height: 1.5; }
+    .fb-box select, .fb-box textarea, .fb-box input {
+      width: 100%; padding: var(--sd-s2); margin-bottom: var(--sd-s1); border: 0; border-radius: var(--sd-r-sm);
+      background: var(--sd-surface-2); color: var(--sd-text); font-size: 16px; outline: none;
+    }
+    .fb-box textarea { resize: none; height: 96px; line-height: 1.5; }
+    .fb-box input::placeholder, .fb-box textarea::placeholder { color: var(--sd-text-3); }
+    .fb-actions { display: flex; justify-content: flex-end; gap: var(--sd-s1); margin-top: var(--sd-s1); }
+    .fb-actions button {
+      min-height: 44px; padding: 0 var(--sd-s4); border: 0; border-radius: var(--sd-r-sm); cursor: pointer;
+      background: var(--sd-surface-2); color: var(--sd-text); font-size: 14px; font-weight: 600;
+      transition: transform var(--sd-fast) var(--sd-ease);
+    }
+    .fb-actions button:active { transform: scale(.97); }
+    .fb-actions .fb-cancel-btn { background: none; color: var(--sd-text-2); }
+    #fb-send, #auth-google-btn { background: var(--sd-accent); color: var(--sd-accent-ink); }
+    .fb-star-row { display: flex; gap: 4px; margin-bottom: var(--sd-s1); }
+    .fb-star { font-size: 22px; cursor: pointer; color: var(--sd-text-3); transition: color var(--sd-fast) ease; }
+    .fb-star.active, .fb-star:hover { color: var(--sd-accent); }
+    .fb-star-hint { min-height: 16px; margin-bottom: var(--sd-s1); color: var(--sd-text-3); font-size: 12px; }
+    .fb-msg { min-height: 20px; margin-top: var(--sd-s1); font-size: 14px; }
+
+    /* ── Touch / narrow screens ────────────────────────────────── */
+    @media (max-width: 860px), (pointer: coarse) {
+      .leaflet-tooltip { font-size: 11px !important; }
+      #header { top: calc(8px + env(safe-area-inset-top)); left: 10px; right: 10px; }
+      #header-left { flex: 1; min-width: 0; padding: 6px; }
+      #cockpit-brand { min-width: 0; max-width: 88px; padding-left: 6px; }
+      .cockpit-brand-title { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+      #airline-picker { flex: 1; min-width: 0; }
+      #airline-chip { width: 100%; min-width: 0; padding: 0 10px; }
+      .airline-chip-label { flex: 1; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+      #airline-picker-panel { position: fixed; top: 0; left: 12px; right: 12px; width: auto; max-width: none; grid-template-columns: 1fr 1fr; margin-top: 0; }
+      .lang-toggle-btn, .achievement-gallery-button, .fb-fab { width: 44px; height: 44px; min-height: 44px; padding: 0; }
+      .achievement-gallery-button-label, #achievement-gallery-button-count, .fb-fab-label { display: none; }
+      #search-wrap { top: calc(72px + env(safe-area-inset-top)); }
+      #search-results { max-height: 48vh; }
+      .global-result-item { grid-template-columns: 40px minmax(0, 1fr); }
+      .global-result-status { grid-column: 2; justify-self: start; margin-top: -3px; }
+      #info-card {
+        left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); width: auto; max-width: none; z-index: 24;
+        pointer-events: none; transform: translateY(16px);
+      }
+      #info-card[style*='opacity: 1'], #info-card[style*='opacity:1'] { transform: translateY(0) !important; pointer-events: auto; }
+      .card-rows { grid-template-columns: 1fr; }
+      .card-row { padding: 7px 0; }
+      .card-key, .card-val { font-size: 13px; }
+      #info-card { max-height: 58dvh; }
+      #zoom-ctrl { right: 10px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 19; }
+      .zoom-btn { width: 44px; height: 44px; }
+      #filter-bar { margin-top: 7px; }
+      #filter-backdrop { display: block; }
+      #filter-backdrop.open { opacity: 1; pointer-events: auto; }
+      #filter-panel {
+        left: 0; right: 0; top: auto !important; bottom: 0; width: 100%; max-height: min(78dvh, 680px);
+        border-width: 1px 0 0; border-radius: var(--sd-r-lg) var(--sd-r-lg) 0 0; box-shadow: none;
+        transform: translateY(104%); transform-origin: 50% 100%; opacity: 1; visibility: visible;
+        transition: transform var(--sd-base) var(--sd-ease);
+      }
+      #filter-panel.open { transform: translateY(0); }
+      .filter-sheet-handle { display: block; width: 36px; height: 5px; margin: var(--sd-s1) auto 0; border-radius: 3px; background: var(--sd-text-3); opacity: .6; }
+      .filter-panel-header { padding-top: var(--sd-s2); }
+      #filter-groups, .filter-panel-footer { padding-left: var(--sd-s3); padding-right: var(--sd-s3); }
+      body.filter-open #map { pointer-events: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .route-popup .leaflet-popup-content-wrapper, .route-popup .leaflet-popup-tip-container,
+      .leaflet-overlay-pane svg path.airport-marker-spring, .leaflet-overlay-pane svg path.airport-arrival-ring,
+      .leaflet-overlay-pane svg path.airline-marker-enter, .leaflet-overlay-pane svg path.airline-marker-exit,
+      .leaflet-overlay-pane svg path.airport-selected-ring, #airline-picker-panel.open .picker-option,
+      .fb-overlay.show, .fb-overlay.show .fb-box { animation: none !important; }
+      #filter-panel, #filter-backdrop, #filter-trigger, .filter-chip, #search-input, #info-card, #airline-chip, #airline-picker-panel { transition-duration: 0.01ms !important; }
+    }
+
+
+    /* ══════════════════════════════════════════════════════════════
+       SkyDex UI v2 — achievement toast, achievement gallery, flight log,
+       journey cards, add / edit flight sheets (tokens come from :root above).
+       ══════════════════════════════════════════════════════════════ */
     #achievement-toast button,
     #achievement-gallery-overlay button,
     .flight-log-sheet-backdrop button,
@@ -1113,51 +512,6 @@
     @media (prefers-reduced-motion: reduce) {
       #achievement-confetti { display: none; }
     }
-
-    /* ── Map-header buttons that open the gallery (unchanged, belong to the header) ── */
-    .lang-toggle-btn {
-      min-height: 38px; min-width: 38px; padding: 0 10px; border-radius: 13px;
-      display: inline-flex; align-items: center; justify-content: center;
-      color: #f6f8fb; background: rgba(8,16,28,.82);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 8px 24px rgba(3,8,18,.18);
-      cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: .02em;
-      transition: transform .18s ease, background .18s ease, border-color .18s ease;
-    }
-    .lang-toggle-btn:hover {
-      transform: translateY(-1px); background: rgba(18,30,48,.96);
-      border-color: rgba(240,194,82,.42);
-    }
-    .achievement-gallery-button {
-      min-height: 38px; padding: 0 13px; border-radius: 13px;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      color: #f6f8fb; background: rgba(8,16,28,.82);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 8px 24px rgba(3,8,18,.18);
-      cursor: pointer; font-size: 12px; font-weight: 700; white-space: nowrap;
-      transition: transform .18s ease, background .18s ease, border-color .18s ease;
-    }
-    .achievement-gallery-button:hover {
-      transform: translateY(-1px); background: rgba(18,30,48,.96);
-      border-color: rgba(240,194,82,.42);
-    }
-    .achievement-gallery-button svg { flex: 0 0 auto; }
-    #achievement-gallery-button-count {
-      min-width: 28px; padding: 2px 6px; border-radius: 999px;
-      color: #211a09; background: #f0c252; font-size: 9px; text-align: center;
-    }
-    @media (max-width: 860px), (pointer: coarse) {
-      .lang-toggle-btn { width: 44px; height: 44px; min-height: 44px; padding: 0; }
-      .achievement-gallery-button { width: 44px; height: 44px; min-height: 44px; padding: 0; }
-      .achievement-gallery-button-label, #achievement-gallery-button-count { display: none; }
-    }
-    .achievement-gallery-button { position: relative; }
-    #auth-status-dot {
-      position: absolute; top: -3px; right: -3px; width: 9px; height: 9px;
-      border-radius: 50%; background: rgba(235,241,249,.28);
-      border: 1.5px solid rgba(8,16,28,.9);
-    }
-    #auth-status-dot.logged-in { background: #7cc68c; }
 
     /* ── Achievement gallery shell ─────────────────────────────── */
     #achievement-gallery-overlay {
@@ -1529,19 +883,11 @@
       #achievement-toast, .achievement-gallery-progress span { transition: none; }
     }
 
-    .route-popup-log-btn {
-      margin-top: 10px; width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(240,194,82,.35);
-      background: rgba(240,194,82,.12); color: #f0c252; font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-    .route-popup-log-btn:hover { background: rgba(240,194,82,.2); }
-    .route-popup-log-btn.done { border-color: rgba(124,198,140,.4); background: rgba(124,198,140,.14); color: #7cc68c; cursor: default; }
-
   </style>
 </head>
 <body>
 <div id="app">
   <div id="map"></div>
-  <div id="map-shade" aria-hidden="true"></div>
   <div id="route-popup-layer" aria-live="polite"></div>
 
   <!-- Header -->
@@ -1617,7 +963,7 @@
         <div class="filter-eyebrow">Route filters</div>
         <div class="filter-title">
           <span id="filter-panel-title" data-i18n="filterPanelTitle">篩選航線</span>
-          <span class="filter-title-dest"><span class="stat-value" id="stat-dest" style="color:#9c6c4c">35</span>目的地</span>
+          <span class="filter-title-dest"><span class="stat-value" id="stat-dest">35</span>目的地</span>
         </div>
       </div>
       <button class="filter-close" type="button" onclick="closeFilterPanel()" aria-label="關閉篩選">
@@ -1679,7 +1025,7 @@
     <div class="fb-box" role="dialog" aria-modal="true">
       <h3 id="auth-box-title" data-i18n="loginTitle">登入 SkyDex</h3>
       <div id="auth-step-email">
-        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;" data-i18n="loginDesc">使用 Google 帳號登入，成就資料將自動同步到雲端。</p>
+        <p class="fb-text" data-i18n="loginDesc">使用 Google 帳號登入，成就資料將自動同步到雲端。</p>
         <div class="fb-actions">
           <button type="button" class="fb-cancel-btn" onclick="authClose()" data-i18n="cancelBtn">取消</button>
           <button id="auth-google-btn" type="button" onclick="authLoginWithGoogle()" data-i18n="loginGoogle">使用 Google 登入</button>
@@ -1687,7 +1033,7 @@
       </div>
       <div id="auth-step-sent" style="display:none"></div>
       <div id="auth-step-loggedin" style="display:none">
-        <p style="font-size:13px;color:#1d1d1f;margin-bottom:10px;"><span data-i18n="loggedInAs">已登入：</span><span id="auth-current-email"></span></p>
+        <p class="fb-text"><span data-i18n="loggedInAs">已登入：</span><span id="auth-current-email"></span></p>
         <div class="fb-actions">
           <button type="button" class="fb-cancel-btn" onclick="authClose()" data-i18n="closeBtn">關閉</button>
           <button id="auth-logout-btn" type="button" onclick="authLogout()" data-i18n="logoutBtn">登出</button>
@@ -2405,7 +1751,6 @@ function handleMarkerClick(d, id) {
 function renderInfoCard(d, id) {
   const meta = AIRLINE_META_INFO[id] || {};
   const card = document.getElementById("info-card");
-  card.style.borderColor = (meta.color || "#000") + "44";
   document.getElementById("card-iata").textContent = d.iata;
   document.getElementById("card-city").textContent = cityName(d.iata, d.city);
 
@@ -3252,24 +2597,10 @@ function updateUI() {
   // Stats — 已停飛（SUSPENDED）及尚未開航（SCHEDULED）航線不計入目的地數量，避免誤導
   const activeDestCount = new Set(al.map(d => d.iata)).size;
   document.getElementById("stat-dest").textContent = activeDestCount;
-  document.getElementById("stat-dest").style.color = meta.color || "#000";
 
-  // Search border color
-  document.getElementById("search-input").style.borderColor = "rgba(0,0,0,0.15)";
-
-  // Sync feedback widget color/text with active airline
+  // Feedback button keeps the neutral header style; only its tooltip follows the active airline
   const fbFab = document.getElementById('fb-fab');
-  const fbSend = document.getElementById('fb-send');
-  if (fbFab) {
-    fbFab.style.background = meta.color || '#2d6bc4';
-    fbFab.style.color = '#fff';
-    fbFab.title = `回報 · ${airlineCommercialName(activeAirline)}`;
-  }
-  if (fbSend) {
-    fbSend.style.background = meta.color || '#2d6bc4';
-    fbSend.style.color = '#fff';
-    fbSend.style.borderColor = meta.color || '#2d6bc4';
-  }
+  if (fbFab) fbFab.title = `回報 · ${airlineCommercialName(activeAirline)}`;
   document.documentElement.style.setProperty('--filter-accent', meta.color || '#5b9bd5');
   updateFilterSummary();
 
@@ -5104,7 +4435,7 @@ function authClose() {
 }
 async function authLoginWithGoogle() {
   const msgEl = document.getElementById('auth-msg');
-  msgEl.textContent = '正在跳轉至 Google...'; msgEl.style.color = '#8496a9';
+  msgEl.textContent = '正在跳轉至 Google...'; msgEl.style.color = 'var(--sd-text-2)';
   try {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
@@ -5115,7 +4446,7 @@ async function authLoginWithGoogle() {
     });
     if (error) throw error;
   } catch (error) {
-    msgEl.textContent = '登入失敗，請稍後再試'; msgEl.style.color = '#ef4444';
+    msgEl.textContent = '登入失敗，請稍後再試'; msgEl.style.color = 'var(--sd-danger)';
   }
 }
 async function authLogout() {
@@ -5184,18 +4515,18 @@ async function fbSubmit(){
   const desc=document.getElementById('fb-desc').value.trim();
   const contact=document.getElementById('fb-contact').value.trim();
   const msgEl=document.getElementById('fb-msg');
-  if(!desc){ msgEl.textContent='請輸入內容'; msgEl.style.color='#ef4444'; return; }
-  msgEl.textContent=t('submitting'); msgEl.style.color='#8496a9';
+  if(!desc){ msgEl.textContent='請輸入內容'; msgEl.style.color='var(--sd-danger)'; return; }
+  msgEl.textContent=t('submitting'); msgEl.style.color='var(--sd-text-2)';
   try{
     const res = await fetch(FEEDBACK_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify({type,description:desc,contact,rating:fbRating||null,page:location.href})});
     if(!res.ok) throw new Error('status '+res.status);
-    msgEl.textContent=t('submitSuccess'); msgEl.style.color='#2ca88e';
+    msgEl.textContent=t('submitSuccess'); msgEl.style.color='var(--sd-success)';
     document.getElementById('fb-desc').value=''; document.getElementById('fb-contact').value='';
     fbRating=0; fbHighlight(0); document.getElementById('fb-star-hint').textContent='';
     setTimeout(fbClose,1200);
   }catch(err){
-    msgEl.textContent=t('submitFail'); msgEl.style.color='#ef4444';
+    msgEl.textContent=t('submitFail'); msgEl.style.color='var(--sd-danger)';
   }
 }
 

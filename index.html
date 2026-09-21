@@ -28,7 +28,8 @@
        One set of rules per component; no light/dark override layers.
        ══════════════════════════════════════════════════════════════ */
     :root {
-      --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      color-scheme: dark;
+      --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       --sd-bg: #0B0F14;
       --sd-surface: #151B23;
       --sd-surface-2: #1C232D;
@@ -172,7 +173,7 @@
       border: 0; border-radius: var(--sd-r-sm); background: transparent; color: var(--sd-text);
       font-size: 14px; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none;
     }
-    .picker-option:hover { background: var(--sd-surface-2); }
+    @media (hover: hover) { .picker-option:hover { background: var(--sd-surface-2); } }
     .picker-option.active { background: var(--sd-surface-2); font-weight: 600; }
     .picker-option-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .picker-option-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -219,7 +220,7 @@
       transition: background var(--sd-fast) ease;
     }
     .global-result-item:last-child { border-bottom: 0; }
-    .global-result-item:hover { background: var(--sd-surface-2); }
+    @media (hover: hover) { .global-result-item:hover { background: var(--sd-surface-2); } }
     .global-airline-code {
       display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 28px; border-radius: 8px;
       background: color-mix(in srgb, var(--airline-color) 22%, transparent); color: var(--sd-text);
@@ -286,7 +287,9 @@
       color: var(--sd-text-2); background: var(--sd-surface-2); cursor: pointer; font-size: 13px; font-weight: 600;
       transition: transform var(--sd-fast) var(--sd-ease), color var(--sd-fast) ease, box-shadow var(--sd-fast) ease;
     }
-    .filter-chip:hover { color: var(--sd-text); }
+    .filter-chip { position: relative; }
+    .filter-chip::before { content: ""; position: absolute; inset: -4px 0; }
+    @media (hover: hover) { .filter-chip:hover { color: var(--sd-text); } }
     .filter-chip:active { transform: scale(.97); }
     .filter-chip.active { color: var(--sd-text); box-shadow: inset 0 0 0 1.5px var(--filter-accent, var(--sd-text-3)); }
     .filter-chip-count { color: var(--sd-text-3); font-size: 12px; }
@@ -341,7 +344,7 @@
       width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer;
       color: var(--sd-text); font-size: 20px; line-height: 1; user-select: none; transition: background var(--sd-fast) ease;
     }
-    .zoom-btn:hover { background: var(--sd-surface-2); }
+    @media (hover: hover) { .zoom-btn:hover { background: var(--sd-surface-2); } }
     .zoom-btn.zoom-out { border-top: 1px solid var(--sd-divider); }
 
     /* ── Feedback & login dialogs ──────────────────────────────── */
@@ -375,7 +378,8 @@
     #fb-send, #auth-google-btn { background: var(--sd-accent); color: var(--sd-accent-ink); }
     .fb-star-row { display: flex; gap: 4px; margin-bottom: var(--sd-s1); }
     .fb-star { font-size: 22px; cursor: pointer; color: var(--sd-text-3); transition: color var(--sd-fast) ease; }
-    .fb-star.active, .fb-star:hover { color: var(--sd-accent); }
+    .fb-star.active { color: var(--sd-accent); }
+    @media (hover: hover) { .fb-star:hover { color: var(--sd-accent); } }
     .fb-star-hint { min-height: 16px; margin-bottom: var(--sd-s1); color: var(--sd-text-3); font-size: 12px; }
     .fb-msg { min-height: 20px; margin-top: var(--sd-s1); font-size: 14px; }
 
@@ -389,7 +393,9 @@
       #airline-picker { flex: 1; min-width: 0; }
       #airline-chip { width: 100%; min-width: 0; padding: 0 10px; }
       .airline-chip-label { flex: 1; overflow: hidden; text-overflow: ellipsis; text-align: left; }
-      #airline-picker-panel { position: fixed; top: 0; left: 12px; right: 12px; width: auto; max-width: none; grid-template-columns: 1fr 1fr; margin-top: 0; }
+      #airline-picker-panel { position: fixed; top: 0; left: 12px; right: 12px; width: auto; max-width: none; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; }
+      .picker-option { min-width: 0; }
+      .picker-option-label { white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
       .lang-toggle-btn, .achievement-gallery-button, .fb-fab { width: 44px; height: 44px; min-height: 44px; padding: 0; }
       .achievement-gallery-button-label, #achievement-gallery-button-count, .fb-fab-label { display: none; }
       #search-wrap { top: calc(72px + env(safe-area-inset-top)); }
@@ -495,7 +501,7 @@
       cursor: pointer; font-size: 20px; line-height: 1;
       transition: color var(--sd-fast) ease;
     }
-    .achievement-close:hover { color: var(--sd-text); }
+    @media (hover: hover) { .achievement-close:hover { color: var(--sd-text); } }
     #achievement-confetti {
       position: fixed; inset: 0; z-index: 2050; overflow: hidden;
       pointer-events: none;
@@ -544,7 +550,7 @@
       transition: color var(--sd-fast) ease, transform var(--sd-fast) var(--sd-ease);
     }
     .achievement-gallery-close::before { content: ""; position: absolute; inset: -6px; }
-    .achievement-gallery-close:hover { color: var(--sd-text); }
+    @media (hover: hover) { .achievement-gallery-close:hover { color: var(--sd-text); } }
     .achievement-gallery-close:active { transform: scale(.94); }
     .achievement-gallery-auth-row {
       grid-column: 1 / -1; display: flex; align-items: center; gap: var(--sd-s1);
@@ -749,7 +755,7 @@
       border: 0; background: none; color: var(--sd-text-2); font-size: 14px; font-weight: 600; cursor: pointer;
       transition: color var(--sd-fast) ease;
     }
-    .trip-edit-btn:hover { color: var(--sd-text); }
+    @media (hover: hover) { .trip-edit-btn:hover { color: var(--sd-text); } }
     .ticket-checkbox {
       position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%;
       border: 1.5px solid var(--sd-text-3); background: transparent; display: none; z-index: 6; cursor: pointer;
@@ -830,13 +836,18 @@
     .flight-log-field textarea { resize: vertical; min-height: 44px; }
     .date-select-group { display: flex; gap: var(--sd-s1); }
     .date-select-group select { flex: 1; min-width: 0; padding: var(--sd-s2) var(--sd-s1); text-align: center; }
+    .fb-box select, .flight-log-field select {
+      -webkit-appearance: none; appearance: none; padding-right: 36px; border-radius: var(--sd-r-sm);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%239CA3AF' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
+    }
+    .date-select-group select { padding-right: 22px; background-position: right 8px center; background-size: 10px; }
     .date-field-row { flex-direction: column; }
     .flight-log-swap-btn {
       width: 44px; height: 44px; margin-top: 22px; border: 0; border-radius: var(--sd-r-sm);
       background: var(--sd-surface-2); color: var(--sd-text-2); cursor: pointer;
       display: grid; place-items: center; flex: 0 0 auto;
     }
-    .flight-log-swap-btn:hover { color: var(--sd-text); }
+    @media (hover: hover) { .flight-log-swap-btn:hover { color: var(--sd-text); } }
     .flight-log-sheet-submit {
       width: 100%; margin-top: var(--sd-s1); padding: 14px; border: 0; border-radius: var(--sd-r-sm);
       background: var(--sd-accent); color: var(--sd-accent-ink); font-size: 16px; font-weight: 600; cursor: pointer;
@@ -1211,16 +1222,17 @@
 </div>
 
 <script>
-let LANG = localStorage.getItem("skydex_lang") === "en" ? "en" : "zh";
+let LANG = "zh";
+try { if (localStorage.getItem("skydex_lang") === "en") LANG = "en"; } catch (e) { /* 儲存被封鎖時退回預設語言 */ }
 function setLang(lang) {
   if (lang !== "zh" && lang !== "en") return;
-  localStorage.setItem("skydex_lang", lang);
+  try { localStorage.setItem("skydex_lang", lang); } catch (e) { /* 儲存被封鎖時無法記住語言 */ }
   location.reload();
 }
 document.getElementById("lang-toggle-btn").textContent = LANG === "en" ? "中" : "EN";
 const STRINGS = {
   zh: {
-    brandTitle: "航線圖鑑", achievementsBtn: "成就", feedbackBtn: "問題回報 / 建議",
+    pageTitle: "航線圖鑑 SkyDex", brandTitle: "航線圖鑑", achievementsBtn: "成就", feedbackBtn: "問題回報 / 建議",
     filterBtn: "篩選", filterPanelTitle: "篩選航線", filterResetBtn: "重設篩選",
     selectedAirports: "已選航點", feedbackTitle: "問題回報 / 建議",
     feedbackBug: "錯誤回報", feedbackSuggestion: "功能建議", cancelBtn: "取消",
@@ -1335,7 +1347,7 @@ const STRINGS = {
     completionN: "完成度 {r}%",
   },
   en: {
-    brandTitle: "Route Atlas", achievementsBtn: "Achievements", feedbackBtn: "Feedback",
+    pageTitle: "SkyDex Route Atlas", brandTitle: "Route Atlas", achievementsBtn: "Achievements", feedbackBtn: "Feedback",
     filterBtn: "Filter", filterPanelTitle: "Route Filters", filterResetBtn: "Reset Filters",
     selectedAirports: "Selected Airports", feedbackTitle: "Feedback",
     feedbackBug: "Report a Bug", feedbackSuggestion: "Feature Suggestion", cancelBtn: "Cancel",
@@ -1459,6 +1471,8 @@ function fmt(key, vars) {
 function listSep() { return LANG === "en" ? ", " : "、"; }
 const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function applyI18n() {
+  document.documentElement.lang = LANG === "en" ? "en" : "zh-TW";
+  document.title = t("pageTitle");
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
   document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.dataset.i18nTitle); });
@@ -1566,6 +1580,9 @@ function animateAirportMarker(d, id) {
   restartPathAnimation(path, "airport-marker-spring");
 }
 
+// 航線數超過此值時不做逐一標記的進出場動畫（SVG path 動畫不走 GPU，行動裝置容易掉幀）
+const MAX_ANIMATED_ROUTES = 100;
+
 function animateLayerEnter(layer, delay = 0) {
   if (prefersReducedMotion || !layer) return;
   const path = layer.getElement && layer.getElement();
@@ -1581,14 +1598,14 @@ function animateLayerEnter(layer, delay = 0) {
   }, 520 + Math.max(0, delay));
 }
 
-function hideRouteWithTransition(route, ownerId) {
+function hideRouteWithTransition(route, ownerId, animate = true) {
   if (!route) return;
   const remove = () => {
     if (activeAirline === ownerId || !map) return;
     if (map.hasLayer(route.hit)) map.removeLayer(route.hit);
     if (map.hasLayer(route.marker)) map.removeLayer(route.marker);
   };
-  if (prefersReducedMotion) {
+  if (prefersReducedMotion || !animate) {
     remove();
     return;
   }
@@ -2149,6 +2166,7 @@ const HUB_LABELS = {
   HGH: "HGH 杭州",
   HKG: "HKG 香港",
   AMS: "AMS 阿姆斯特丹",
+  CDG: "CDG 巴黎戴高樂",
   HAN: "HAN 河內",
   SGN: "SGN 胡志明市",
   DAD: "DAD 峴港",
@@ -2186,6 +2204,7 @@ const HUB_LABELS_EN = {
   HGH: "HGH Hangzhou",
   HKG: "HKG Hong Kong",
   AMS: "AMS Amsterdam",
+  CDG: "CDG Paris",
   HAN: "HAN Hanoi",
   SGN: "SGN Ho Chi Minh City",
   DAD: "DAD Da Nang",
@@ -2601,7 +2620,8 @@ function showAirline(id) {
 
   // Fade/scale previous airline out. Removal is delayed briefly so the transition is visible.
   otherIDs.forEach(otherID => {
-    Object.values(layers[otherID]).forEach(route => hideRouteWithTransition(route, otherID));
+    const animateExit = Object.keys(layers[otherID]).length <= MAX_ANIMATED_ROUTES;
+    Object.values(layers[otherID]).forEach(route => hideRouteWithTransition(route, otherID, animateExit));
     Object.keys(hubMarkers).forEach(k => {
       if (k.startsWith(`${otherID}_`)) hideHubWithTransition(hubMarkers[k], otherID);
     });
@@ -2623,7 +2643,7 @@ function showAirline(id) {
     if (!map.hasLayer(route.hit)) route.hit.addTo(map);
     const markerPath = route.marker.getElement && route.marker.getElement();
     if (markerPath) markerPath.classList.remove("airline-marker-exit");
-    animateLayerEnter(route.marker, Math.min(index * (isTouchDevice ? 20 : 28), isTouchDevice ? 380 : 520));
+    if (al.length <= MAX_ANIMATED_ROUTES) animateLayerEnter(route.marker, Math.min(index * (isTouchDevice ? 20 : 28), isTouchDevice ? 380 : 520));
 
     route.hit.off("mouseover").off("mouseout").off("click").off("touchstart").off("touchend").off("pointerdown").off("pointerup").off("tap");
     // Desktop: click handler
@@ -2845,7 +2865,7 @@ const ACHIEVEMENT_DEFINITIONS = [
   },
   {
     id: "northeastAsiaTraveler", title: "東北亞旅人", titleEn: "Northeast Asia Traveler", code: "NEA", type: "regionGroupAirports",
-    regions: ["JAPAN", "NORTHEAST_ASIA"], target: 10, countryTarget: 2,
+    regions: ["JAPAN", "NORTHEAST_ASIA"], countries: ["Japan", "South Korea"], target: 10, countryTarget: 2,
     difficulty: "中級", difficultyEn: "Intermediate", badge: "assets/badges/japan-traveler.png"
   },
   {
@@ -2956,11 +2976,12 @@ let currentAuthUser = null;
 async function cloudPushAchievementState(state) {
   if (!currentAuthUser) return;
   try {
-    await supabaseClient.from("achievement_states").upsert({
+    const { error } = await supabaseClient.from("achievement_states").upsert({
       user_id: currentAuthUser.id,
       state,
       updated_at: new Date().toISOString()
     });
+    if (error) throw error;
   } catch (error) {
     console.warn("Cloud sync (push) failed.", error);
   }
@@ -3051,7 +3072,7 @@ function formatAchievementDate(value) {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("zh-TW", {
+  return new Intl.DateTimeFormat(LANG === "en" ? "en-US" : "zh-TW", {
     year: "numeric", month: "short", day: "numeric"
   }).format(date);
 }
@@ -3256,7 +3277,9 @@ function achievementProgress(definition, state) {
   }
   if (definition.type === "regionGroupAirports") {
     const regions = new Set(definition.regions || []);
-    const matchingAirports = airports.filter(iata => regions.has(AIRPORT_MASTER[iata]?.region));
+    const allowedCountries = definition.countries ? new Set(definition.countries) : null;
+    const matchingAirports = airports.filter(iata => regions.has(AIRPORT_MASTER[iata]?.region)
+      && (!allowedCountries || allowedCountries.has(AIRPORT_MASTER[iata]?.country)));
     const countries = new Set(matchingAirports
       .map(iata => AIRPORT_MASTER[iata]?.country)
       .filter(Boolean));
@@ -4076,19 +4099,26 @@ async function maybePairFlightLog(newRow) {
   if (!candidate) return;
   const ok = window.confirm(fmt('mergeConfirm', { dep: candidate.dep_iata, arr: candidate.arr_iata, date: candidate.flight_date }));
   if (!ok) return;
+  let firstDone = false, secondDone = false;
   try {
     const { error } = await supabaseClient.from('flight_logs')
       .update({ paired_log_id: candidate.id })
       .eq('id', newRow.id);
     if (error) throw error;
+    firstDone = true;
     const { error: error2 } = await supabaseClient.from('flight_logs')
       .update({ paired_log_id: newRow.id })
       .eq('id', candidate.id);
     if (error2) throw error2;
+    secondDone = true;
     flightLogsCache = await fetchFlightLogs();
     renderFlightLogPanel();
   } catch (error) {
     console.warn('Pair flight log failed.', error);
+    if (firstDone && !secondDone) {
+      // 只配到一半（單向配對）：把第一筆還原，避免兩筆資料狀態不對稱
+      try { await supabaseClient.from('flight_logs').update({ paired_log_id: null }).eq('id', newRow.id); } catch (e) { console.warn('Unpair revert failed.', e); }
+    }
   }
 }
 
@@ -4253,6 +4283,13 @@ function setDateSelectValue(prefix, dateStr) {
   syncDateSelectToHidden(prefix);
 }
 function syncDateSelectToHidden(prefix) {
+  // 依年月停用不存在的日期（如 2/30），並把已選的日夾到該月最後一天
+  const dEl = document.getElementById(`${prefix}-d`);
+  const daysInMonth = new Date(+document.getElementById(`${prefix}-y`).value, +document.getElementById(`${prefix}-m`).value, 0).getDate();
+  if (daysInMonth) {
+    [...dEl.options].forEach(o => { o.disabled = +o.value > daysInMonth; });
+    if (+dEl.value > daysInMonth) dEl.value = daysInMonth;
+  }
   const y = document.getElementById(`${prefix}-y`).value;
   const m = String(document.getElementById(`${prefix}-m`).value).padStart(2, '0');
   const d = String(document.getElementById(`${prefix}-d`).value).padStart(2, '0');
@@ -4566,6 +4603,8 @@ async function submitAddFlightSheetImpl() {
     msgEl.textContent = t('msgOutboundAfterReturn'); msgEl.style.color = 'var(--sd-danger)'; return;
   }
   msgEl.textContent = t('msgSaving'); msgEl.style.color = 'var(--sd-text-2)';
+  const createdIds = [];
+  let dbWriteDone = false;
   try {
     const { data: outboundRow, error: outErr } = await supabaseClient.from('flight_logs').insert({
       user_id: currentAuthUser.id,
@@ -4578,6 +4617,7 @@ async function submitAddFlightSheetImpl() {
       airline_id: depAirlineId || null
     }).select().single();
     if (outErr) throw outErr;
+    createdIds.push(outboundRow.id);
 
     const { data: inboundRow, error: inErr } = await supabaseClient.from('flight_logs').insert({
       user_id: currentAuthUser.id,
@@ -4590,6 +4630,7 @@ async function submitAddFlightSheetImpl() {
       airline_id: retAirlineId || null
     }).select().single();
     if (inErr) throw inErr;
+    createdIds.push(inboundRow.id);
 
     const { error: pairErr1 } = await supabaseClient.from('flight_logs')
       .update({ paired_log_id: inboundRow.id }).eq('id', outboundRow.id);
@@ -4597,6 +4638,7 @@ async function submitAddFlightSheetImpl() {
     const { error: pairErr2 } = await supabaseClient.from('flight_logs')
       .update({ paired_log_id: outboundRow.id }).eq('id', inboundRow.id);
     if (pairErr2) throw pairErr2;
+    dbWriteDone = true;
 
     closeAddFlightSheet();
     flightLogsCache = await fetchFlightLogs();
@@ -4604,6 +4646,13 @@ async function submitAddFlightSheetImpl() {
     trackAirportAchievements({ iata: arr }, null);
     trackAirportAchievements({ iata: dep }, null);
   } catch (error) {
+    if (!dbWriteDone && createdIds.length) {
+      // 去回程兩筆不是同一筆交易：寫入中途失敗時，盡力刪掉已寫入的紀錄，避免留下孤兒紀錄、重試又重複
+      try {
+        const { error: rbErr } = await supabaseClient.from('flight_logs').delete().in('id', createdIds);
+        if (rbErr) console.warn('Rollback failed.', rbErr);
+      } catch (rbEx) { console.warn('Rollback failed.', rbEx); }
+    }
     msgEl.textContent = t('msgSaveFail'); msgEl.style.color = 'var(--sd-danger)';
   }
 }
@@ -4657,7 +4706,7 @@ async function authLogout() {
   await supabaseClient.auth.signOut();
   // 清除本機的成就/飛行紀錄快取，避免同一裝置換帳號登入時，
   // 上一位使用者殘留在 localStorage 的資料被聯集合併並誤傳到新帳號的雲端。
-  localStorage.removeItem(ACHIEVEMENT_STORAGE_KEY);
+  try { localStorage.removeItem(ACHIEVEMENT_STORAGE_KEY); } catch (e) { /* 儲存被封鎖時略過 */ }
   flightLogsCache = [];
   flightLogYearFilter = 'all';
   if (myFlightsVisible && myFlightsLayer) {

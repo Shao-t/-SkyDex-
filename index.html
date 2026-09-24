@@ -1539,11 +1539,16 @@ function mapCoord(c, iata) {
   return c;
 }
 function mapRouteCoord(d, id) {
-  if (id !== "TK") return mapCoord(d.coords, d.iata);
-
-  // 土耳其航空以每條航線的出發地為基準，選擇距離最近的世界地圖副本。
+  // 原本只有 TK（土耳其航空）會用「跟起點最近的世界副本」這種邏輯，
+  // 但只要樞紐機場本身落在西半球（例如 AA 的 PHL/JFK/DFW/MIA），
+  // 飛往歐洲/中東/南亞等小正數經度的航線，用單純的 mapCoord 全域平移
+  // 會被判定成「數字差距超過 180 度」，畫成繞了大半個地球的錯誤弧線。
+  // 因此這裡讓「就近取最短路徑」對所有航空公司一視同仁，而不是只給 TK 用。
   const meta = AIRLINE_META_INFO[id] || {};
-  const originCoord = HUB_COORDS[d.origin] || AIRPORT_MASTER[d.origin]?.coords || meta.hubCoords || HUB_COORDS.IST;
+  const originRawCoord = HUB_COORDS[d.origin] || AIRPORT_MASTER[d.origin]?.coords || meta.hubCoords || HUB_COORDS.TPE;
+  // 「哪個世界副本離起點最近」要跟地圖上實際畫出的起點座標比，
+  // 起點本身也會經過 mapCoord 平移，比較基準不一致的話，就近判斷會整個算錯。
+  const originCoord = mapCoord(originRawCoord, d.origin);
   const [lat, lng] = d.coords;
   const candidateLngs = [lng - 360, lng, lng + 360];
   const nearestLng = candidateLngs.reduce((nearest, candidate) =>
@@ -2019,11 +2024,8 @@ function routePatternMapPoints(d, id, pattern) {
 
   return rawPoints.map((point, index) => {
     if (index === 0) return mapCoord(point.coords, point.iata);
-    if (id === "TK") {
-      const previous = rawPoints[index - 1];
-      return mapRouteCoord({ ...d, iata: point.iata, coords: point.coords, origin: previous.iata }, id);
-    }
-    return mapCoord(point.coords, point.iata);
+    const previous = rawPoints[index - 1];
+    return mapRouteCoord({ ...d, iata: point.iata, coords: point.coords, origin: previous.iata }, id);
   });
 }
 function routePatternArc(d, id, pattern) {
@@ -2067,9 +2069,7 @@ function openRoutePopup(d, id, showPopup = true) {
   stopIatas.forEach(iata => {
     const airport = AIRPORT_MASTER[iata];
     if (!airport) return;
-    const stopCoord = id === "TK"
-      ? mapRouteCoord({ ...d, iata, coords: airport.coords }, id)
-      : mapCoord(airport.coords, iata);
+    const stopCoord = mapRouteCoord({ ...d, iata, coords: airport.coords }, id);
     routeLayers.push(L.marker(stopCoord, {
       icon: L.divIcon({
         className: "route-stop-marker-wrap",
@@ -2473,11 +2473,11 @@ window.addEventListener("DOMContentLoaded", () => {
     worldCopyJump: false,
     minZoom: 2,
     zoomControl: false,
-    // 這個範圍是實際比對過 AIRPORT_MASTER 全部座標（平移後約 -9.14°~359.65°）
-    // 以及 TK 航線特殊座標系統（最西到墨西哥市 MEX，約 -99.07°）算出來的，
+    // 這個範圍是把 mapRouteCoord 通用化之後，重新掃過「全部航空公司」
+    // 每一條航線的起訖點座標算出來的（實測範圍約 -149.6°~437.1°，
+    // 最遠是 AF/KL/TK 飛溫哥華一帶、以及 AA 從費城/紐約飛歐洲與新德里），
     // 兩端都留了緩衝，讓邊界落在太平洋/大西洋中央這種沒有機場的地方。
-    // 用 maxBounds 只是「彈性擋住」拖曳，不會像 worldCopyJump 那樣瞬間跳動畫面。
-    maxBounds: L.latLngBounds([-90, -120], [90, 380]),
+    maxBounds: L.latLngBounds([-90, -170], [90, 460]),
     maxBoundsViscosity: 1.0,
   }).setView([25, 115], 3);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -4208,7 +4208,13 @@ function buildMyFlightsLayer(rows) {
     visitedAirports.add(seg.dep);
     visitedAirports.add(seg.arr);
     const s = mapCoord(depAirport.coords, seg.dep);
-    const e = mapCoord(arrAirport.coords, seg.arr);
+    // 跟航線圖用同一套邏輯：終點要挑「離起點最近的世界副本」，
+    // 否則像 PHL/JFK 飛歐洲這種起點已平移過的航段，一樣會被畫成繞遠路的錯誤弧線。
+    const eCandidates = [arrAirport.coords[1] - 360, arrAirport.coords[1], arrAirport.coords[1] + 360];
+    const eLng = eCandidates.reduce((nearest, candidate) =>
+      Math.abs(candidate - s[1]) < Math.abs(nearest - s[1]) ? candidate : nearest,
+    arrAirport.coords[1]);
+    const e = [arrAirport.coords[0], eLng];
     const topAirlineId = Object.keys(seg.airlineCounts).sort((a, b) => seg.airlineCounts[b] - seg.airlineCounts[a])[0];
     const routeColor = (topAirlineId && AIRLINE_META_INFO[topAirlineId]?.color) || '#f0c252';
     layerItems.push(L.polyline(bezierArc(s, e), {

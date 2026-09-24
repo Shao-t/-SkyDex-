@@ -2470,17 +2470,20 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   map = L.map("map", {
-    // worldCopyJump: 滑到另一份世界複本時，Leaflet 會自動把視角無縫跳回主世界，
-    // 讓所有航點（marker）與航線（polyline）持續保持可見。
-    // 這與現有的跨換日線座標平移邏輯（mapCoord / mapRouteCoord）相容——
-    // 那些函式本來就會讓經度超出 ±180°，worldCopyJump 只是負責讓「視角」不要滑到沒有資料的複本，
-    // 不會限制或裁切任何航線本身的座標範圍。
-    worldCopyJump: true,
+    worldCopyJump: false,
     minZoom: 2,
     zoomControl: false,
+    // 這個範圍是實際比對過 AIRPORT_MASTER 全部座標（平移後約 -9.14°~359.65°）
+    // 以及 TK 航線特殊座標系統（最西到墨西哥市 MEX，約 -99.07°）算出來的，
+    // 兩端都留了緩衝，讓邊界落在太平洋/大西洋中央這種沒有機場的地方。
+    // 用 maxBounds 只是「彈性擋住」拖曳，不會像 worldCopyJump 那樣瞬間跳動畫面。
+    maxBounds: L.latLngBounds([-90, -120], [90, 380]),
+    maxBoundsViscosity: 1.0,
   }).setView([25, 115], 3);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     opacity: 0.9,
+    // 不加 noWrap：底圖圖磚仍要能依經度自動換算對應的正確地理位置，
+    // 這樣經度超過 180 的平移座標（美洲、TK 特殊航線）才能顯示正確的實際地形。
     referrerPolicy: "strict-origin-when-cross-origin",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
   }).addTo(map);

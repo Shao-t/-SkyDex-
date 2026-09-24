@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="airline-data.js?v=20260910-vietnam-airlines"></script>
+  <script src="airline-data.js?v=20260922-american-airlines"></script>
   <script>
     // Supabase 專案連線設定（anon public key，可公開放在前端）
     const SUPABASE_URL = "https://zpdsjrfcpkoogfxkawne.supabase.co";
@@ -197,7 +197,7 @@
 
     /* ── Search ────────────────────────────────────────────────── */
     #search-wrap {
-      position: absolute; top: calc(82px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+      position: absolute; top: calc(70px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
       z-index: 21; width: min(390px, calc(100vw - 32px));
     }
     #search-inner { position: relative; }
@@ -398,7 +398,7 @@
       .picker-option-label { white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
       .lang-toggle-btn, .achievement-gallery-button, .fb-fab { width: 44px; height: 44px; min-height: 44px; padding: 0; }
       .achievement-gallery-button-label, #achievement-gallery-button-count, .fb-fab-label { display: none; }
-      #search-wrap { top: calc(72px + env(safe-area-inset-top)); }
+      #search-wrap { top: calc(60px + env(safe-area-inset-top)); }
       #search-results { max-height: 48vh; }
       .global-result-item { grid-template-columns: 40px minmax(0, 1fr); }
       .global-result-status { grid-column: 2; justify-self: start; margin-top: -3px; }
@@ -1580,6 +1580,9 @@ function animateAirportMarker(d, id) {
   restartPathAnimation(path, "airport-marker-spring");
 }
 
+// 航線數超過此值時不做逐一標記的進出場動畫（SVG path 動畫不走 GPU，行動裝置容易掉幀）
+const MAX_ANIMATED_ROUTES = 100;
+
 function animateLayerEnter(layer, delay = 0) {
   if (prefersReducedMotion || !layer) return;
   const path = layer.getElement && layer.getElement();
@@ -2126,7 +2129,6 @@ const HUB_COORDS = {
   HGH: [30.2295, 120.4344],
   HKG: [22.3080, 113.9185],
   CDG: [49.0097, 2.5479],
-  DFW: [32.8998, -97.0403], MIA: [25.7959, -80.287], PHL: [39.8744, -75.2424], JFK: [40.6413, -73.7781], BKK: [13.69, 100.7501],
   AMS: [52.3086, 4.7639],
   HAN: [21.2212, 105.8072],
   SGN: [10.8188, 106.6520],
@@ -2165,7 +2167,6 @@ const HUB_LABELS = {
   HKG: "HKG 香港",
   AMS: "AMS 阿姆斯特丹",
   CDG: "CDG 巴黎戴高樂",
-  DFW: "DFW 達拉斯", MIA: "MIA 邁阿密", PHL: "PHL 費城", JFK: "JFK 紐約", BKK: "BKK 曼谷",
   HAN: "HAN 河內",
   SGN: "SGN 胡志明市",
   DAD: "DAD 峴港",
@@ -2204,13 +2205,12 @@ const HUB_LABELS_EN = {
   HKG: "HKG Hong Kong",
   AMS: "AMS Amsterdam",
   CDG: "CDG Paris",
-  DFW: "DFW Dallas", MIA: "MIA Miami", PHL: "PHL Philadelphia", JFK: "JFK New York", BKK: "BKK Bangkok",
   HAN: "HAN Hanoi",
   SGN: "SGN Ho Chi Minh City",
   DAD: "DAD Da Nang",
   BOTH: "Songshan/Taoyuan Dual Hub",
 };
-const AIRPORT_CITY_EN = {ACC:"Accra",ADD:"Addis Ababa",ADL:"Adelaide",AER:"Sochi",AGP:"Malaga",AKJ:"Asahikawa",AKL:"Auckland",ALA:"Almaty",ALG:"Algiers",AMD:"Ahmedabad",AMM:"Amman",AMS:"Amsterdam",AOJ:"Aomori",ARN:"Stockholm",ASM:"Asmara",ATH:"Athens",ATL:"Atlanta",AUH:"Abu Dhabi",AXT:"Akita",AYT:"Antalya",BAH:"Bahrain",BCN:"Barcelona",BEY:"Beirut",BKI:"Kota Kinabalu",BKK:"Bangkok",BLR:"Bangalore",BNE:"Brisbane",BOM:"Mumbai",BOS:"Boston",BRU:"Brussels",BUD:"Budapest",CAI:"Cairo",CAN:"Guangzhou",CCJ:"Kozhikode",CCU:"Kolkata",CDG:"Paris",CEB:"Cebu",CGO:"Zhengzhou",CGK:"Jakarta",CGQ:"Changchun",CHC:"Christchurch",CJJ:"Cheongju",CJU:"Jeju",CLT:"Charlotte",CMB:"Colombo",CMN:"Casablanca",CKG:"Chongqing",CNX:"Chiang Mai",COK:"Kochi",CPH:"Copenhagen",CRK:"Clark",CSX:"Changsha",CTS:"Sapporo",CNS:"Cairns",CXR:"Nha Trang",CTU:"Chengdu",DAC:"Dhaka",DAD:"Da Nang",DAM:"Damascus",DBB:"El Alamein",DEL:"New Delhi",DFW:"Dallas",DLC:"Dalian",DMM:"Dammam",DOH:"Doha",DPS:"Bali",DUB:"Dublin",DUS:"Dusseldorf",DWC:"Dubai",DXB:"Dubai",DYG:"Zhangjiajie",ELQ:"Qassim",EVN:"Yerevan",EZE:"Buenos Aires",FCO:"Rome",FBM:"Lubumbashi",FKS:"Fukushima",FOC:"Fuzhou",FRA:"Frankfurt",FUK:"Fukuoka",GMP:"Seoul",GUM:"Guam",GVA:"Geneva",GYD:"Baku",HAK:"Haikou",HAN:"Hanoi",HBE:"El Alamein",HFE:"Hefei",HGH:"Hangzhou",HIJ:"Hiroshima",HIN:"Sacheon",HKD:"Hakodate",HKG:"Hong Kong",HKT:"Phuket",HNA:"Hanamaki",HND:"Tokyo",HNL:"Honolulu",HRE:"Harare",HRB:"Harbin",HSG:"Saga",HSA:"Turkistan",HYD:"Hyderabad",IAD:"Washington",IAH:"Houston",IBR:"Ibaraki",ICN:"Seoul",ISB:"Islamabad",ISG:"Ishigaki",IST:"Istanbul",JAI:"Jaipur",JED:"Jeddah",JFK:"New York",JMK:"Mykonos",JNB:"Johannesburg",JTR:"Santorini",KBL:"Kabul",KBV:"Krabi",KCZ:"Kochi",KHH:"Kaohsiung",KHI:"Karachi",KIJ:"Niigata",KIX:"Osaka",KMG:"Kunming",KMI:"Miyazaki",KMJ:"Kumamoto",KMQ:"Komatsu",KNO:"Medan",KOJ:"Kagoshima",KPO:"Pohang",KRK:"Krakow",KTM:"Kathmandu",KUL:"Kuala Lumpur",KWI:"Kuwait City",KWJ:"Gwangju",KZN:"Kazan",LAS:"Las Vegas",LAX:"Los Angeles",LED:"St. Petersburg",LGW:"London",LHE:"Lahore",LHR:"London",LPQ:"Luang Prabang",LIS:"Lisbon",LUX:"Luxembourg",MAA:"Chennai",MAD:"Madrid",MAN:"Manchester",MCT:"Muscat",MDL:"Mandalay",MED:"Medina",MEL:"Melbourne",MFM:"Macau",MLE:"Male",MNL:"Manila",MRS:"Marseille",MUC:"Munich",MXP:"Milan",MYJ:"Matsuyama",NBO:"Nairobi",NCE:"Nice",NGO:"Nagoya",NGS:"Nagasaki",NHA:"Nha Trang",NGB:"Ningbo",NKG:"Nanjing",NRT:"Tokyo",OIT:"Oita",OKA:"Naha",OKJ:"Okayama",ONT:"Ontario",ORD:"Chicago",ORY:"Paris",OTP:"Bucharest",PEK:"Beijing",PEN:"Penang",PER:"Perth",PEW:"Peshawar",PHX:"Phoenix",PKX:"Beijing",PMI:"Palma de Mallorca",KTI:"Phnom Penh",PQC:"Phu Quoc",PRG:"Prague",PUS:"Busan",PVG:"Shanghai",RGN:"Yangon",RMQ:"Taichung",ROR:"Koror",RSU:"Yeosu",RUH:"Riyadh",SDJ:"Sendai",SEA:"Seattle",SFO:"San Francisco",SAI:"Siem Reap",SGN:"Ho Chi Minh City",SHA:"Shanghai",SHE:"Shenyang",SHI:"Shimojishima",SIN:"Singapore",SLL:"Salalah",SUB:"Surabaya",SVO:"Moscow",SYD:"Sydney",SZX:"Shenzhen",TAE:"Daegu",TAK:"Takamatsu",TAO:"Qingdao",TAS:"Tashkent",TBS:"Tbilisi",TFU:"Chengdu",TKS:"Tokushima",TOY:"Toyama",TLV:"Tel Aviv",TNN:"Tainan",TPE:"Taipei",TRV:"Thiruvananthapuram",TSA:"Taipei",TSN:"Tianjin",TTJ:"Tottori",TUN:"Tunis",UBN:"Ulaanbaatar",URC:"Urumqi",UKB:"Kobe",ULN:"Ulaanbaatar",USN:"Ulsan",VCE:"Venice",VIE:"Vienna",VTE:"Vientiane",WAW:"Warsaw",WEH:"Weihai",WNZ:"Wenzhou",WUH:"Wuhan",XIY:"Xi'an",XMN:"Xiamen",YGJ:"Yonago",YNJ:"Yanji",YNT:"Yantai",YVR:"Vancouver",YYC:"Calgary",YYZ:"Toronto",ZNZ:"Zanzibar",ZRH:"Zurich",EWR:"New York",DEN:"Denver",DTW:"Detroit",MSP:"Minneapolis",MIA:"Miami",MCO:"Orlando",RDU:"Raleigh-Durham",YUL:"Montreal",YOW:"Ottawa",YQB:"Quebec City",MEX:"Mexico City",SJO:"San Jose",PUJ:"Punta Cana",GIG:"Rio de Janeiro",FOR:"Fortaleza",SSA:"Salvador",GRU:"Sao Paulo",SCL:"Santiago",BOG:"Bogota",PTY:"Panama City",LIM:"Lima",CAY:"Cayenne",PPT:"Papeete",ABJ:"Abidjan",ABV:"Abuja",JRO:"Kilimanjaro",BZV:"Brazzaville",FIH:"Kinshasa",PNR:"Pointe-Noire",DLA:"Douala",NSI:"Yaounde",NDJ:"N'Djamena",SSG:"Malabo",COO:"Cotonou",LBV:"Libreville",LFW:"Lome",RUN:"Saint-Denis",PTP:"Pointe-a-Pitre",FDF:"Fort-de-France",ITM:"Osaka",WKJ:"Wakkanai",MBE:"Monbetsu",MMB:"Memanbetsu",SHB:"Nakashibetsu",KUH:"Kushiro",OBO:"Obihiro",ONJ:"Odate-Noshiro",SYO:"Shonai",NTQ:"Noto",HAC:"Hachijojima",IWK:"Iwakuni",UBJ:"Yamaguchi Ube",IWJ:"Iwami",KKJ:"Kitakyushu",MMY:"Miyako",FSZ:"Shizuoka",RIS:"Rishiri",FUJ:"Fukue",TSJ:"Tsushima",ALP:"Aleppo",AQJ:"Aqaba",ASB:"Ashgabat",BEG:"Belgrade",BEN:"Benghazi",BER:"Berlin",BGW:"Baghdad",BHK:"Bukhara",BHX:"Birmingham",BIO:"Bilbao",BJL:"Banjul",BLL:"Billund",BLQ:"Bologna",BOD:"Bordeaux",BRE:"Bremen",BRI:"Bari",BSL:"Basel",BSR:"Basra",BSZ:"Bishkek",BUS:"Batumi",CCS:"Caracas",CGN:"Cologne",CKY:"Conakry",CLJ:"Cluj-Napoca",CND:"Constanta",CPT:"Cape Town",CTA:"Catania",CUN:"Cancun",CZL:"Constantine",DAR:"Dar es Salaam",DBV:"Dubrovnik",DSS:"Dakar",DYU:"Dushanbe",EBB:"Entebbe",EBL:"Erbil",ECN:"Ercan",EDI:"Edinburgh",FEG:"Fergana",GOT:"Gothenburg",HAJ:"Hannover",HAM:"Hamburg",HAV:"Havana",HEL:"Helsinki",IFN:"Isfahan",IKA:"Tehran",ISU:"Sulaymaniyah",JIB:"Djibouti",JUB:"Juba",KGL:"Kigali",LEJ:"Leipzig",LJU:"Ljubljana",LOS:"Lagos",LYS:"Lyon",MBA:"Mombasa",MGQ:"Mogadishu",MHD:"Mashhad",MJI:"Tripoli",MLA:"Malta",MRA:"Misrata",MRU:"Mauritius",MSQ:"Minsk",NAP:"Naples",NBJ:"Luanda",NIM:"Niamey",NJF:"Najaf",NQZ:"Astana",NKC:"Nouakchott",NUE:"Nuremberg",OHD:"Ohrid",OPO:"Porto",ORN:"Oran",OSL:"Oslo",OUA:"Ouagadougou",PMO:"Palermo",PRN:"Pristina",PZU:"Port Sudan",RAK:"Marrakesh",RIX:"Riga",RMO:"Chisinau",RVN:"Rovaniemi",SEZ:"Seychelles",SJJ:"Sarajevo",SKD:"Samarkand",SKG:"Thessaloniki",SKP:"Skopje",SOF:"Sofia",SSH:"Sharm El Sheikh",STN:"London",STR:"Stuttgart",SVQ:"Seville",SYZ:"Shiraz",SZG:"Salzburg",TBZ:"Tabriz",TGD:"Podgorica",TIA:"Tirana",TIF:"Taif",TIV:"Tivat",TLL:"Tallinn",TLS:"Toulouse",TRN:"Turin",TSR:"Timisoara",UGC:"Urgench",VAR:"Varna",VKO:"Moscow",VLC:"Valencia",VNO:"Vilnius",YNB:"Yanbu",ZAG:"Zagreb",BEL:"Belem",SPU:"Split",KTT:"Kittila",AJA:"Ajaccio",BIA:"Bastia",BIQ:"Biarritz",BES:"Brest",CFR:"Caen",CLY:"Calvi",CFE:"Clermont-Ferrand",FSC:"Figari",MPL:"Montpellier",NTE:"Nantes",PUF:"Pau",RNS:"Rennes",HER:"Heraklion",RHO:"Rhodes",ORK:"Cork",CAG:"Cagliari",FLR:"Florence",LIN:"Milan",OLB:"Olbia",VRN:"Verona",TNR:"Antananarivo",RBA:"Rabat",TNG:"Tangier",BGO:"Bergen",TOS:"Tromso",FAO:"Faro",SXM:"Sint Maarten",IBZ:"Ibiza",TFS:"Tenerife",NCL:"Newcastle",BMV:"Buon Ma Thuot",DIN:"Dien Bien Phu",DLI:"Da Lat",HPH:"Hai Phong",HUI:"Hue",PXU:"Pleiku",TBB:"Tuy Hoa",THD:"Thanh Hoa",UIH:"Quy Nhon",VCL:"Chu Lai",VCA:"Can Tho",VCS:"Con Dao",VDH:"Dong Hoi",VII:"Vinh",AUA:"Aruba",BGI:"Bridgetown",YEG:"Edmonton",BON:"Kralendijk",CTG:"Cartagena",CUR:"Willemstad",LCA:"Larnaca",AAL:"Aalborg",GYE:"Guayaquil",UIO:"Quito",GEO:"Georgetown",GOA:"Genoa",JER:"Jersey",AES:"Alesund",KRS:"Kristiansand",SVG:"Stavanger",TRD:"Trondheim",GDN:"Gdansk",POZ:"Poznan",WRO:"Wroclaw",ALC:"Alicante",OVD:"Asturias",SCQ:"Santiago de Compostela",PBM:"Paramaribo",LPI:"Linkoping",POS:"Port of Spain",ABZ:"Aberdeen",BHD:"Belfast",BRS:"Bristol",CWL:"Cardiff",MME:"Durham Tees Valley",EXT:"Exeter",GLA:"Glasgow",HUY:"Humberside",INV:"Inverness",LBA:"Leeds",LCY:"London",NWI:"Norwich",SOU:"Southampton",AUS:"Austin",PDX:"Portland",SLC:"Salt Lake City",SAN:"San Diego",VVO:"Vladivostok",AXA:"Anguilla",ANU:"St. John's",BIM:"Bimini",FPO:"Freeport",GHB:"Governor's Harbour",GGT:"Exuma",MHH:"Marsh Harbour",NAS:"Nassau",ELH:"North Eleuthera",BZE:"Belize City",BDA:"Bermuda",EIS:"Tortola",YHZ:"Halifax",GCM:"Grand Cayman",BAQ:"Barranquilla",CLO:"Cali",MDE:"Medellin",LIR:"Liberia",CMW:"Camaguey",HOG:"Holguin",SNU:"Santa Clara",SCU:"Santiago de Cuba",VRA:"Varadero",DOM:"Dominica",LRM:"La Romana",POP:"Puerto Plata",STI:"Santiago",SDQ:"Santo Domingo",SAL:"San Salvador",GND:"Grenada",GUA:"Guatemala City",CAP:"Cap-Haitien",XPL:"Comayagua",RTB:"Roatan",SAP:"San Pedro Sula",KEF:"Reykjavik",KIN:"Kingston",MBJ:"Montego Bay",OCJ:"Ocho Rios",ACA:"Acapulco",AGU:"Aguascalientes",CUU:"Chihuahua",CZM:"Cozumel",DGO:"Durango",GDL:"Guadalajara",HMO:"Hermosillo",HUX:"Huatulco",ZIH:"Ixtapa/Zihuatanejo",BJX:"Leon",LTO:"Loreto",ZLO:"Manzanillo",MZT:"Mazatlan",MID:"Merida",MTY:"Monterrey",MLM:"Morelia",OAX:"Oaxaca",PXM:"Puerto Escondido",PVR:"Puerto Vallarta",QRO:"Queretaro",SJD:"Los Cabos",SLP:"San Luis Potosi",TAM:"Tampico",TRC:"Torreon",TQO:"Tulum",VER:"Veracruz",ZCL:"Zacatecas",MGA:"Managua",SKB:"St. Kitts",UVF:"St. Lucia",SVD:"St. Vincent",PLS:"Providenciales",XSC:"South Caicos",MVD:"Montevideo",MAR:"Maracaibo",KKC:"Khon Kaen",CEI:"Chiang Rai",HDY:"Hat Yai",UTH:"Udon Thani",UBP:"Ubon Ratchathani",GAY:"Gaya"};
+const AIRPORT_CITY_EN = {ACC:"Accra",ADD:"Addis Ababa",ADL:"Adelaide",AER:"Sochi",AGP:"Malaga",AKJ:"Asahikawa",AKL:"Auckland",ALA:"Almaty",ALG:"Algiers",AMD:"Ahmedabad",AMM:"Amman",AMS:"Amsterdam",AOJ:"Aomori",ARN:"Stockholm",ASM:"Asmara",ATH:"Athens",ATL:"Atlanta",AUH:"Abu Dhabi",AXT:"Akita",AYT:"Antalya",BAH:"Bahrain",BCN:"Barcelona",BEY:"Beirut",BKI:"Kota Kinabalu",BKK:"Bangkok",BLR:"Bangalore",BNE:"Brisbane",BOM:"Mumbai",BOS:"Boston",BRU:"Brussels",BUD:"Budapest",CAI:"Cairo",CAN:"Guangzhou",CCJ:"Kozhikode",CCU:"Kolkata",CDG:"Paris",CEB:"Cebu",CGO:"Zhengzhou",CGK:"Jakarta",CGQ:"Changchun",CHC:"Christchurch",CJJ:"Cheongju",CJU:"Jeju",CLT:"Charlotte",CMB:"Colombo",CMN:"Casablanca",CKG:"Chongqing",CNX:"Chiang Mai",COK:"Kochi",CPH:"Copenhagen",CRK:"Clark",CSX:"Changsha",CTS:"Sapporo",CNS:"Cairns",CXR:"Nha Trang",CTU:"Chengdu",DAC:"Dhaka",DAD:"Da Nang",DAM:"Damascus",DBB:"El Alamein",DEL:"New Delhi",DFW:"Dallas",DLC:"Dalian",DMM:"Dammam",DOH:"Doha",DPS:"Bali",DUB:"Dublin",DUS:"Dusseldorf",DWC:"Dubai",DXB:"Dubai",DYG:"Zhangjiajie",ELQ:"Qassim",EVN:"Yerevan",EZE:"Buenos Aires",FCO:"Rome",FBM:"Lubumbashi",FKS:"Fukushima",FOC:"Fuzhou",FRA:"Frankfurt",FUK:"Fukuoka",GMP:"Seoul",GUM:"Guam",GVA:"Geneva",GYD:"Baku",HAK:"Haikou",HAN:"Hanoi",HBE:"El Alamein",HFE:"Hefei",HGH:"Hangzhou",HIJ:"Hiroshima",HIN:"Sacheon",HKD:"Hakodate",HKG:"Hong Kong",HKT:"Phuket",HNA:"Hanamaki",HND:"Tokyo",HNL:"Honolulu",HRE:"Harare",HRB:"Harbin",HSG:"Saga",HSA:"Turkistan",HYD:"Hyderabad",IAD:"Washington",IAH:"Houston",IBR:"Ibaraki",ICN:"Seoul",ISB:"Islamabad",ISG:"Ishigaki",IST:"Istanbul",JAI:"Jaipur",JED:"Jeddah",JFK:"New York",JMK:"Mykonos",JNB:"Johannesburg",JTR:"Santorini",KBL:"Kabul",KBV:"Krabi",KCZ:"Kochi",KHH:"Kaohsiung",KHI:"Karachi",KIJ:"Niigata",KIX:"Osaka",KMG:"Kunming",KMI:"Miyazaki",KMJ:"Kumamoto",KMQ:"Komatsu",KNO:"Medan",KOJ:"Kagoshima",KPO:"Pohang",KRK:"Krakow",KTM:"Kathmandu",KUL:"Kuala Lumpur",KWI:"Kuwait City",KWJ:"Gwangju",KZN:"Kazan",LAS:"Las Vegas",LAX:"Los Angeles",LED:"St. Petersburg",LGW:"London",LHE:"Lahore",LHR:"London",LPQ:"Luang Prabang",LIS:"Lisbon",LUX:"Luxembourg",MAA:"Chennai",MAD:"Madrid",MAN:"Manchester",MCT:"Muscat",MDL:"Mandalay",MED:"Medina",MEL:"Melbourne",MFM:"Macau",MLE:"Male",MNL:"Manila",MRS:"Marseille",MUC:"Munich",MXP:"Milan",MYJ:"Matsuyama",NBO:"Nairobi",NCE:"Nice",NGO:"Nagoya",NGS:"Nagasaki",NHA:"Nha Trang",NGB:"Ningbo",NKG:"Nanjing",NRT:"Tokyo",OIT:"Oita",OKA:"Naha",OKJ:"Okayama",ONT:"Ontario",ORD:"Chicago",ORY:"Paris",OTP:"Bucharest",PEK:"Beijing",PEN:"Penang",PER:"Perth",PEW:"Peshawar",PHX:"Phoenix",PKX:"Beijing",PMI:"Palma de Mallorca",KTI:"Phnom Penh",PQC:"Phu Quoc",PRG:"Prague",PUS:"Busan",PVG:"Shanghai",RGN:"Yangon",RMQ:"Taichung",ROR:"Koror",RSU:"Yeosu",RUH:"Riyadh",SDJ:"Sendai",SEA:"Seattle",SFO:"San Francisco",SAI:"Siem Reap",SGN:"Ho Chi Minh City",SHA:"Shanghai",SHE:"Shenyang",SHI:"Shimojishima",SIN:"Singapore",SLL:"Salalah",SUB:"Surabaya",SVO:"Moscow",SYD:"Sydney",SZX:"Shenzhen",TAE:"Daegu",TAK:"Takamatsu",TAO:"Qingdao",TAS:"Tashkent",TBS:"Tbilisi",TFU:"Chengdu",TKS:"Tokushima",TOY:"Toyama",TLV:"Tel Aviv",TNN:"Tainan",TPE:"Taipei",TRV:"Thiruvananthapuram",TSA:"Taipei",TSN:"Tianjin",TTJ:"Tottori",TUN:"Tunis",UBN:"Ulaanbaatar",URC:"Urumqi",UKB:"Kobe",ULN:"Ulaanbaatar",USN:"Ulsan",VCE:"Venice",VIE:"Vienna",VTE:"Vientiane",WAW:"Warsaw",WEH:"Weihai",WNZ:"Wenzhou",WUH:"Wuhan",XIY:"Xi'an",XMN:"Xiamen",YGJ:"Yonago",YNJ:"Yanji",YNT:"Yantai",YVR:"Vancouver",YYC:"Calgary",YYZ:"Toronto",ZNZ:"Zanzibar",ZRH:"Zurich",EWR:"New York",DEN:"Denver",DTW:"Detroit",MSP:"Minneapolis",MIA:"Miami",MCO:"Orlando",RDU:"Raleigh-Durham",YUL:"Montreal",YOW:"Ottawa",YQB:"Quebec City",MEX:"Mexico City",SJO:"San Jose",PUJ:"Punta Cana",GIG:"Rio de Janeiro",FOR:"Fortaleza",SSA:"Salvador",GRU:"Sao Paulo",SCL:"Santiago",BOG:"Bogota",PTY:"Panama City",LIM:"Lima",CAY:"Cayenne",PPT:"Papeete",ABJ:"Abidjan",ABV:"Abuja",JRO:"Kilimanjaro",BZV:"Brazzaville",FIH:"Kinshasa",PNR:"Pointe-Noire",DLA:"Douala",NSI:"Yaounde",NDJ:"N'Djamena",SSG:"Malabo",COO:"Cotonou",LBV:"Libreville",LFW:"Lome",RUN:"Saint-Denis",PTP:"Pointe-a-Pitre",FDF:"Fort-de-France",ITM:"Osaka",WKJ:"Wakkanai",MBE:"Monbetsu",MMB:"Memanbetsu",SHB:"Nakashibetsu",KUH:"Kushiro",OBO:"Obihiro",ONJ:"Odate-Noshiro",SYO:"Shonai",NTQ:"Noto",HAC:"Hachijojima",IWK:"Iwakuni",UBJ:"Yamaguchi Ube",IWJ:"Iwami",KKJ:"Kitakyushu",MMY:"Miyako",FSZ:"Shizuoka",RIS:"Rishiri",FUJ:"Fukue",TSJ:"Tsushima",ALP:"Aleppo",AQJ:"Aqaba",ASB:"Ashgabat",BEG:"Belgrade",BEN:"Benghazi",BER:"Berlin",BGW:"Baghdad",BHK:"Bukhara",BHX:"Birmingham",BIO:"Bilbao",BJL:"Banjul",BLL:"Billund",BLQ:"Bologna",BOD:"Bordeaux",BRE:"Bremen",BRI:"Bari",BSL:"Basel",BSR:"Basra",BSZ:"Bishkek",BUS:"Batumi",CCS:"Caracas",CGN:"Cologne",CKY:"Conakry",CLJ:"Cluj-Napoca",CND:"Constanta",CPT:"Cape Town",CTA:"Catania",CUN:"Cancun",CZL:"Constantine",DAR:"Dar es Salaam",DBV:"Dubrovnik",DSS:"Dakar",DYU:"Dushanbe",EBB:"Entebbe",EBL:"Erbil",ECN:"Ercan",EDI:"Edinburgh",FEG:"Fergana",GOT:"Gothenburg",HAJ:"Hannover",HAM:"Hamburg",HAV:"Havana",HEL:"Helsinki",IFN:"Isfahan",IKA:"Tehran",ISU:"Sulaymaniyah",JIB:"Djibouti",JUB:"Juba",KGL:"Kigali",LEJ:"Leipzig",LJU:"Ljubljana",LOS:"Lagos",LYS:"Lyon",MBA:"Mombasa",MGQ:"Mogadishu",MHD:"Mashhad",MJI:"Tripoli",MLA:"Malta",MRA:"Misrata",MRU:"Mauritius",MSQ:"Minsk",NAP:"Naples",NBJ:"Luanda",NIM:"Niamey",NJF:"Najaf",NQZ:"Astana",NKC:"Nouakchott",NUE:"Nuremberg",OHD:"Ohrid",OPO:"Porto",ORN:"Oran",OSL:"Oslo",OUA:"Ouagadougou",PMO:"Palermo",PRN:"Pristina",PZU:"Port Sudan",RAK:"Marrakesh",RIX:"Riga",RMO:"Chisinau",RVN:"Rovaniemi",SEZ:"Seychelles",SJJ:"Sarajevo",SKD:"Samarkand",SKG:"Thessaloniki",SKP:"Skopje",SOF:"Sofia",SSH:"Sharm El Sheikh",STN:"London",STR:"Stuttgart",SVQ:"Seville",SYZ:"Shiraz",SZG:"Salzburg",TBZ:"Tabriz",TGD:"Podgorica",TIA:"Tirana",TIF:"Taif",TIV:"Tivat",TLL:"Tallinn",TLS:"Toulouse",TRN:"Turin",TSR:"Timisoara",UGC:"Urgench",VAR:"Varna",VKO:"Moscow",VLC:"Valencia",VNO:"Vilnius",YNB:"Yanbu",ZAG:"Zagreb",BEL:"Belem",SPU:"Split",KTT:"Kittila",AJA:"Ajaccio",BIA:"Bastia",BIQ:"Biarritz",BES:"Brest",CFR:"Caen",CLY:"Calvi",CFE:"Clermont-Ferrand",FSC:"Figari",MPL:"Montpellier",NTE:"Nantes",PUF:"Pau",RNS:"Rennes",HER:"Heraklion",RHO:"Rhodes",ORK:"Cork",CAG:"Cagliari",FLR:"Florence",LIN:"Milan",OLB:"Olbia",VRN:"Verona",TNR:"Antananarivo",RBA:"Rabat",TNG:"Tangier",BGO:"Bergen",TOS:"Tromso",FAO:"Faro",SXM:"Sint Maarten",IBZ:"Ibiza",TFS:"Tenerife",NCL:"Newcastle",BMV:"Buon Ma Thuot",DIN:"Dien Bien Phu",DLI:"Da Lat",HPH:"Hai Phong",HUI:"Hue",PXU:"Pleiku",TBB:"Tuy Hoa",THD:"Thanh Hoa",UIH:"Quy Nhon",VCL:"Chu Lai",VCA:"Can Tho",VCS:"Con Dao",VDH:"Dong Hoi",VII:"Vinh",AUA:"Aruba",BGI:"Bridgetown",YEG:"Edmonton",BON:"Kralendijk",CTG:"Cartagena",CUR:"Willemstad",LCA:"Larnaca",AAL:"Aalborg",GYE:"Guayaquil",UIO:"Quito",GEO:"Georgetown",GOA:"Genoa",JER:"Jersey",AES:"Alesund",KRS:"Kristiansand",SVG:"Stavanger",TRD:"Trondheim",GDN:"Gdansk",POZ:"Poznan",WRO:"Wroclaw",ALC:"Alicante",OVD:"Asturias",SCQ:"Santiago de Compostela",PBM:"Paramaribo",LPI:"Linkoping",POS:"Port of Spain",ABZ:"Aberdeen",BHD:"Belfast",BRS:"Bristol",CWL:"Cardiff",MME:"Durham Tees Valley",EXT:"Exeter",GLA:"Glasgow",HUY:"Humberside",INV:"Inverness",LBA:"Leeds",LCY:"London",NWI:"Norwich",SOU:"Southampton",AUS:"Austin",PDX:"Portland",SLC:"Salt Lake City",SAN:"San Diego",VVO:"Vladivostok"};
 function cityName(iata, fallbackZh) {
   if (LANG === "en") return AIRPORT_CITY_EN[iata] || fallbackZh || iata;
   return fallbackZh || iata;
@@ -2550,14 +2550,6 @@ window.addEventListener("DOMContentLoaded", () => {
     .bindTooltip(hubLabelHtml(hubLabelText("RMQ")), { permanent:true, direction:"right", offset:[7,0] });
   hubMarkers["AF_CDG"] = L.circleMarker(HUB_COORDS.CDG, { radius:8, color:"#002157", fillColor:"#002157", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml(hubLabelText("CDG")), { permanent:true, direction:"right", offset:[9,0] });
-  hubMarkers["AA_DFW"] = L.circleMarker(HUB_COORDS.DFW, { radius:8, color:"#C8102E", fillColor:"#C8102E", fillOpacity:1, weight:2, interactive:false })
-    .bindTooltip(hubLabelHtml(hubLabelText("DFW")), { permanent:true, direction:"right", offset:[9,0] });
-  ["MIA","PHL","JFK"].forEach(origin => {
-    hubMarkers[`AA_${origin}`] = L.circleMarker(HUB_COORDS[origin], { radius:6, color:"#C8102E", fillColor:"#fff", fillOpacity:1, weight:2, interactive:false })
-      .bindTooltip(hubLabelHtml(hubLabelText(origin)), { permanent:true, direction:"right", offset:[7,0] });
-  });
-  hubMarkers["TG_BKK"] = L.circleMarker(HUB_COORDS.BKK, { radius:8, color:"#5C2D91", fillColor:"#5C2D91", fillOpacity:1, weight:2, interactive:false })
-    .bindTooltip(hubLabelHtml(hubLabelText("BKK")), { permanent:true, direction:"right", offset:[9,0] });
   hubMarkers["KL_AMS"] = L.circleMarker(HUB_COORDS.AMS, { radius:8, color:"#00A1DE", fillColor:"#00A1DE", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml(hubLabelText("AMS")), { permanent:true, direction:"right", offset:[9,0] });
   hubMarkers["NH_HND"] = L.circleMarker(HUB_COORDS.HND, { radius:8, color:"#005BAC", fillColor:"#005BAC", fillOpacity:1, weight:2, interactive:false })
@@ -2572,6 +2564,14 @@ window.addEventListener("DOMContentLoaded", () => {
     .bindTooltip(hubLabelHtml(hubLabelText("SGN")), { permanent:true, direction:"right", offset:[7,0] });
   hubMarkers["VN_DAD"] = L.circleMarker(HUB_COORDS.DAD, { radius:6, color:"#0072BC", fillColor:"#fff", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml(hubLabelText("DAD")), { permanent:true, direction:"right", offset:[7,0] });
+  hubMarkers["TG_BKK"] = L.circleMarker(HUB_COORDS.BKK, { radius:8, color:"#5C2D91", fillColor:"#5C2D91", fillOpacity:1, weight:2, interactive:false })
+    .bindTooltip(hubLabelHtml(hubLabelText("BKK")), { permanent:true, direction:"right", offset:[9,0] });
+  ["DFW", "MIA", "PHL", "JFK"].forEach((origin, index) => {
+    hubMarkers[`AA_${origin}`] = L.circleMarker(HUB_COORDS[origin], {
+      radius: index === 0 ? 8 : 6, color:"#C8102E", fillColor:index === 0 ? "#C8102E" : "#fff",
+      fillOpacity:1, weight:2, interactive:false
+    }).bindTooltip(hubLabelHtml(hubLabelText(origin)), { permanent:true, direction:"right", offset:[index === 0 ? 9 : 7,0] });
+  });
 
   // Build markers for all airlines
   // 註：這段要放在「Hub markers」區塊之後執行，因為判斷是否要跳過標籤時
@@ -2628,7 +2628,8 @@ function showAirline(id) {
 
   // Fade/scale previous airline out. Removal is delayed briefly so the transition is visible.
   otherIDs.forEach(otherID => {
-    Object.values(layers[otherID]).forEach(route => hideRouteWithTransition(route, otherID));
+    const animateExit = Object.keys(layers[otherID]).length <= MAX_ANIMATED_ROUTES;
+    Object.values(layers[otherID]).forEach(route => hideRouteWithTransition(route, otherID, animateExit));
     Object.keys(hubMarkers).forEach(k => {
       if (k.startsWith(`${otherID}_`)) hideHubWithTransition(hubMarkers[k], otherID);
     });
@@ -2650,7 +2651,7 @@ function showAirline(id) {
     if (!map.hasLayer(route.hit)) route.hit.addTo(map);
     const markerPath = route.marker.getElement && route.marker.getElement();
     if (markerPath) markerPath.classList.remove("airline-marker-exit");
-    animateLayerEnter(route.marker, Math.min(index * (isTouchDevice ? 20 : 28), isTouchDevice ? 380 : 520));
+    if (al.length <= MAX_ANIMATED_ROUTES) animateLayerEnter(route.marker, Math.min(index * (isTouchDevice ? 20 : 28), isTouchDevice ? 380 : 520));
 
     route.hit.off("mouseover").off("mouseout").off("click").off("touchstart").off("touchend").off("pointerdown").off("pointerup").off("tap");
     // Desktop: click handler

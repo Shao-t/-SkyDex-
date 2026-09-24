@@ -2469,7 +2469,16 @@ window.addEventListener("DOMContentLoaded", () => {
     s.addEventListener('click',      () => { fbRating = fbRating === +s.dataset.val ? 0 : +s.dataset.val; fbHighlight(fbRating); document.getElementById('fb-star-hint').textContent = fbRating ? FB_STAR_LABELS[fbRating] : ''; });
   });
 
-  map = L.map("map", { worldCopyJump: false, minZoom: 2, zoomControl: false }).setView([25, 115], 3);
+  map = L.map("map", {
+    // worldCopyJump: 滑到另一份世界複本時，Leaflet 會自動把視角無縫跳回主世界，
+    // 讓所有航點（marker）與航線（polyline）持續保持可見。
+    // 這與現有的跨換日線座標平移邏輯（mapCoord / mapRouteCoord）相容——
+    // 那些函式本來就會讓經度超出 ±180°，worldCopyJump 只是負責讓「視角」不要滑到沒有資料的複本，
+    // 不會限制或裁切任何航線本身的座標範圍。
+    worldCopyJump: true,
+    minZoom: 2,
+    zoomControl: false,
+  }).setView([25, 115], 3);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     opacity: 0.9,
     referrerPolicy: "strict-origin-when-cross-origin",

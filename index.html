@@ -1515,9 +1515,16 @@ function haversine(a, b) {
 }
 const LEFT_SIDE_AIRPORTS = new Set(["ACC", "MAD", "LHR", "LGW", "DUB", "LIS", "AGP", "MAN", "CMN"]);
 
-function bezierArc(s, e, preferLeftSide = false) {
-  let eLng = e[1];
-  if (!preferLeftSide && s[1] > 0 && e[1] < 0) eLng = e[1] + 360;
+function bezierArc(s, e) {
+  const eLng = e[1];
+  // 注意：這裡不再對 eLng 做任何額外修正。
+  // 呼叫端（routePatternArc / buildMyFlightsLayer）在傳進來之前，
+  // 已經用 mapRouteCoord／就近取最短路徑邏輯把 s、e 的經度差保證在 ±180° 以內了。
+  // 舊版這裡曾經有「s[1]>0 && e[1]<0 時 eLng+360」的修正，
+  // 那是在還沒有 mapRouteCoord 通用化之前，用來亡羊補牢的殘留邏輯——
+  // 現在傳進來的座標已經算對了，這段舊邏輯反而會把算對的答案又改回錯的那一邊
+  // （例如 AF 飛太平洋、EY 飛美國，都是「起點經度是正數、算對的終點是負數」，
+  //  正好完全踩到這個舊邏輯的判斷條件，被硬改回錯誤方向）。
   // 扁平版：弧線高度依兩點距離縮放，短程航線弧度輕微，長程航線設上限避免過度隆起。
   const dist = Math.hypot(e[0] - s[0], eLng - s[1]);
   const arcHeight = Math.min(Math.max(dist * 0.12, 1.2), 6);
@@ -2030,15 +2037,9 @@ function routePatternMapPoints(d, id, pattern) {
 }
 function routePatternArc(d, id, pattern) {
   const points = routePatternMapPoints(d, id, pattern);
-  const stopIatas = pattern.stops || [];
   const arc = [];
   for (let i = 1; i < points.length; i += 1) {
-    const destinationIata = i <= stopIatas.length ? stopIatas[i - 1] : d.iata;
-    const segment = bezierArc(
-      points[i - 1],
-      points[i],
-      id === "TK" || LEFT_SIDE_AIRPORTS.has(destinationIata),
-    );
+    const segment = bezierArc(points[i - 1], points[i]);
     arc.push(...(arc.length ? segment.slice(1) : segment));
   }
   return arc;
@@ -2470,20 +2471,17 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   map = L.map("map", {
+    // 不設 maxBounds：地圖回到 Leaflet 原生的無限循環捲動（拖過邊界就接著顯示下一份世界），
+    // 這樣才不會因為邊界寬度超過一份世界（之前設到 630 度）讓 Leaflet 內部平移限制的計算出錯、造成閃退。
+    // 航線與航點座標已經用 mapRouteCoord 算好、固定不變，捲動並不會觸發重新計算或跳動。
     worldCopyJump: false,
     minZoom: 2,
     zoomControl: false,
-    // 這個範圍是把 mapRouteCoord 通用化之後，重新掃過「全部航空公司」
-    // 每一條航線的起訖點座標算出來的（實測範圍約 -149.6°~437.1°，
-    // 最遠是 AF/KL/TK 飛溫哥華一帶、以及 AA 從費城/紐約飛歐洲與新德里），
-    // 兩端都留了緩衝，讓邊界落在太平洋/大西洋中央這種沒有機場的地方。
-    maxBounds: L.latLngBounds([-90, -170], [90, 460]),
-    maxBoundsViscosity: 1.0,
   }).setView([25, 115], 3);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     opacity: 0.9,
-    // 不加 noWrap：底圖圖磚仍要能依經度自動換算對應的正確地理位置，
-    // 這樣經度超過 180 的平移座標（美洲、TK 特殊航線）才能顯示正確的實際地形。
+    // 不加 noWrap：底圖圖磚會依經度自動換算對應的正確地理位置並無限重複，
+    // 這樣經度超過 180 的座標（美洲、AF/EY 等跨洲航線）才能顯示正確的實際地形，也才能無限循環捲動。
     referrerPolicy: "strict-origin-when-cross-origin",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
   }).addTo(map);

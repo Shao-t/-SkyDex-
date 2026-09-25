@@ -2561,10 +2561,10 @@ window.addEventListener("DOMContentLoaded", () => {
     .bindTooltip(hubLabelHtml(hubLabelText("RMQ")), { permanent:true, direction:"right", offset:[7,0] });
   hubMarkers["AF_CDG"] = L.circleMarker(HUB_COORDS.CDG, { radius:8, color:"#002157", fillColor:"#002157", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml(hubLabelText("CDG")), { permanent:true, direction:"right", offset:[9,0] });
-  hubMarkers["AA_DFW"] = L.circleMarker(HUB_COORDS.DFW, { radius:8, color:"#C8102E", fillColor:"#C8102E", fillOpacity:1, weight:2, interactive:false })
+  hubMarkers["AA_DFW"] = L.circleMarker(mapCoord(HUB_COORDS.DFW, "DFW"), { radius:8, color:"#C8102E", fillColor:"#C8102E", fillOpacity:1, weight:2, interactive:false })
     .bindTooltip(hubLabelHtml(hubLabelText("DFW")), { permanent:true, direction:"right", offset:[9,0] });
   ["MIA","PHL","JFK"].forEach(origin => {
-    hubMarkers[`AA_${origin}`] = L.circleMarker(HUB_COORDS[origin], { radius:6, color:"#C8102E", fillColor:"#fff", fillOpacity:1, weight:2, interactive:false })
+    hubMarkers[`AA_${origin}`] = L.circleMarker(mapCoord(HUB_COORDS[origin], origin), { radius:6, color:"#C8102E", fillColor:"#fff", fillOpacity:1, weight:2, interactive:false })
       .bindTooltip(hubLabelHtml(hubLabelText(origin)), { permanent:true, direction:"right", offset:[7,0] });
   });
   hubMarkers["TG_BKK"] = L.circleMarker(HUB_COORDS.BKK, { radius:8, color:"#5C2D91", fillColor:"#5C2D91", fillOpacity:1, weight:2, interactive:false })
@@ -2759,6 +2759,20 @@ function showAirline(id) {
       animateLayerEnter(marker, 0);
     }
   });
+
+  // 自動把地圖飛到這家航空公司自己的樞紐，而不是死守在亞洲視角。
+  // 樞紐在台灣/亞洲的公司（多數國籍航空）幾乎感覺不到變化；
+  // 樞紐在美洲、歐洲、中東的公司（例如 AA、AF、EY）選擇後會自動飛過去，
+  // 這樣才不會出現「航點都畫對了，但畫面還停在地球另一邊看不到」的失真狀況。
+  const hubLatLng = hubMarker
+    ? hubMarker.getLatLng()
+    : (() => {
+        const raw = HUB_COORDS[meta.hub] || AIRPORT_MASTER[meta.hub]?.coords || meta.hubCoords;
+        return raw ? L.latLng(mapCoord(raw, meta.hub)) : null;
+      })();
+  if (hubLatLng) {
+    map.flyTo(hubLatLng, 3, { duration: 1.2 });
+  }
 }
 
 function switchAirline(id) {
